@@ -117,3 +117,6 @@ export PATH="$HOME/.tmuxifier/bin:$PATH"
 # Tmuxifier
 alias onvif='tmuxifier s onvif'
 eval "$(tmuxifier init -)"
+
+# Zoxide
+eval "$(zoxide init zsh)"
