@@ -6,5 +6,8 @@ do
     echo "stow $folder"
     stow -D $folder
     stow $folder
+    if [[ -f "extras/$folder" ]]; then
+      source "extras/$folder"
+    fi
 done
 popd
