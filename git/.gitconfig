@@ -1,19 +1,24 @@
 [user]
-	name = vicmaeg
-	email = vmartos@outlook.com
+  name = vicmaeg
+  email = vmartos@outlook.com
 [core]
   editor = nvim
 [color]
-	ui = auto
-	diff = auto
+  ui = auto
+  diff = auto
 [push]
-	default = tracking
+  default = tracking
 [branch]
-	autosetuprebase = always
+  autosetuprebase = always
 [alias]
-	l = log --graph --abbrev-commit --decorate --date=relative --format=format:'%C(bold blue)%h%C(reset) - %C(bold green)(%ar)%C(reset) %C(white)%s%C(reset) %C(dim white)- %an%C(reset)%C(bold yellow)%d%C(reset)' --all
-	d = diff --word-diff
-	s = status --short
-	a = add -u
-	c = commit
-	up = !sh -c \"git commit -a -m \\\"Before rebase\\\" && git pull --rebase && git reset HEAD~1\"
+  l = log --graph --abbrev-commit --decorate --date=relative --format=format:'%C(bold blue)%h%C(reset) - %C(bold green)(%ar)%C(reset) %C(white)%s%C(reset) %C(dim white)- %an%C(reset)%C(bold yellow)%d%C(reset)' --all
+  d = diff --word-diff
+  s = status --short
+  a = add -u
+  c = commit
+  up = !sh -c \"git commit -a -m \\\"Before rebase\\\" && git pull --rebase && git reset HEAD~1\"
+  r = rebase -i --autosquash
+  pushd = push -u origin HEAD
+  pushf = push -f origin HEAD
+  sf = !sh -c \"git branch | fzf | xargs git switch\"
+  clean-branches = !sh -c 'git branch --merged | grep -Ev \"(^\\*|master|main|dev)\" | xargs git branch -d'
