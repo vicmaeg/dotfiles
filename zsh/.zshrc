@@ -103,6 +103,11 @@ fi
 # alias zshconfig="mate ~/.zshrc"
 # alias ohmyzsh="mate ~/.oh-my-zsh"
 
+source ~/.zsh_profile
+
+# Aliases
+alias lg=lazygit
+
 # START SSH AGENT and add ssh keys
 if ! pgrep -u "$USER" ssh-agent >/dev/null; then
   ssh-agent -t 1h >"$XDG_RUNTIME_DIR/ssh-agent.env"
@@ -112,11 +117,6 @@ if [[ ! -f "$SSH_AUTH_SOCK" ]]; then
 fi
 
 ssh-add ~/.ssh/github 2>/dev/null
-export PATH="$HOME/.tmuxifier/bin:$PATH"
-
-# Tmuxifier
-alias onvif='tmuxifier s onvif'
-eval "$(tmuxifier init -)"
 
 # Zoxide
 eval "$(zoxide init zsh)"
