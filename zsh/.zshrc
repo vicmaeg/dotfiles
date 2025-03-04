@@ -107,6 +107,7 @@ source ~/.zsh_profile
 
 # Aliases
 alias lg=lazygit
+alias t=tmux-sessionizer
 
 # START SSH AGENT and add ssh keys
 if ! pgrep -u "$USER" ssh-agent >/dev/null; then
