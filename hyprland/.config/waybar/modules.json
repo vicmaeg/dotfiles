@@ -66,11 +66,6 @@
         "format-critical": " {temperatureC}",
         "format": " {temperatureC}°C"
     },
-    "hyprland/language": {
-       "format": "  {}",
-       "format-en": "EN",
-       "format-ru": "RU"
-    },
     "battery": {
         "states": {
             "warning": 30,
