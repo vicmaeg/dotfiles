@@ -5,7 +5,7 @@ for folder in $(echo $STOW_FOLDERS | sed "s/,/ /g")
 do
     echo "stow $folder"
     stow -D $folder
-    stow $folder
+    stow -t $HOME $folder
     if [[ -f "extras/$folder" ]]; then
       source "extras/$folder"
     fi
