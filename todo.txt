@@ -1,0 +1,14 @@
+=== TODO ===
+
+* Configure archlinux wsl the same way as I would do in my work laptop
+	* create a bash script that will setup all the necessary work (and personal) dependencies using pacman: git, nvim, lazygit, lazydocker, docker cli, podman or rancher, wget, zoxide, nushell
+* understand my neovim configuration based on MiniMax and make it my own, removing plugins and/or adding new plugins
+	* Currently it logs error when opening some .lua files of my configuration. Fix it.
+	* I like to continue using Mini as much as possible, but I need to understand all the plugins. Fzf-lua for picker is what it is better for me.
+	* I would like to invest time on a workflow that uses git worktrees at work
+	* I would like to invest time on setting up some lua code to start workspaces/projects in new vim tabs.
+		* Consider neovide if I really like this workflow
+* configure nvim-dap to debug inside neovim: configure it for go and .net
+* check options for running .http files for testing: hurl and similar
+* check options to run sql scripts within neovim
+

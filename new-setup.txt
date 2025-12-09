@@ -1,0 +1,19 @@
+=== New Arch Linux Setup step by step ===
+
+1- install archlinux in wsl: wsl --install archlinux, more info: https://wiki.archlinux.org/title/Install_Arch_Linux_on_WSL
+2- setup root password and create a new user with same password, follow: 
+
+```
+After installing archlinux WSL, you are already logged in as root which means you don't need sudo to run any command
+
+So to create a new user ( I'll use my username boltzz ) run useradd -m boltzz then passwd boltzz which will give you a prompt to enter and confirm new password. Also set a password for root by running passwd ( I kept this same as user password ).
+
+Run pacman -Syu to update distro. You also need to download sudo so run pacman -S sudo. Then download nano ( or any other text editor ) by pacman -S nano. Now set your user as default by editing wsl.conf. To do that run nano /etc/wsl.conf. Start editing at bottom and add [user] then in next line default=boltzz, save and exit.
+
+Lastly, you need to add your user to sudoers. There is a direct way and a wheel way. I'll show direct one because wheel looks like I had to do it when creating new user. So to add your user to sudo run nano /etc/sudoers. Look for a line root ALL=(ALL:ALL) ALL, its close to bottom in file. Copy this line then paste it in next line and replace root by your username. It should look like boltzz ALL=(ALL:ALL) ALL, then save and exit.
+
+Now exit out of distro by exit which will put you inside powershell. Run wsl --shutdown, then wsl -d archlinux. It should now put you in as user and you should be able to run sudo.
+```
+3- install git with pacman -S git 
+4- use git credential manager in wsl from windows following this steps: https://github.com/git-ecosystem/git-credential-manager/blob/release/docs/wsl.md#configuring-wsl-with-git-for-windows-recommended
+	4.1- for this I would need to maybe reinstall git with the gcm option enabled
