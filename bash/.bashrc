@@ -1,12 +1,10 @@
-source ~/.local/share/omarchy/default/bash/rc
-
-PATH="$PATH:/home/vicmaeg/.dotnet/tools"
-PATH="$PATH:/home/vicmaeg/.local/tmux-sessionizer"
-
-if [ -z "$SSH_AUTH_SOCK" ] ; then
-  eval `ssh-agent -s`
-  ssh-add ~/.ssh/github
-fi
+PATH="$PATH:$HOME/.dotnet/tools"
+PATH="$PATH:$HOME/.local/tmux-sessionizer"
 
 alias lg=lazygit
 alias t=tmux-sessionizer
+alias ls=eza
+alias cd=z
+
+eval "$(starship init bash)"
+eval "$(zoxide init bash)"

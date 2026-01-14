@@ -3,6 +3,8 @@
   email = vmartos@outlook.com
 [core]
   editor = nvim
+[credential]
+  helper = /mnt/c/Program\\ Files/Git/mingw64/bin/git-credential-manager.exe
 [color]
   ui = auto
   diff = auto
