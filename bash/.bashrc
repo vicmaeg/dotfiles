@@ -6,6 +6,7 @@ alias lg=lazygit
 alias t=tmux-sessionizer
 alias ls=eza
 alias cd=z
+alias v=nvim
 
 eval "$(starship init bash)"
 eval "$(zoxide init bash)"
