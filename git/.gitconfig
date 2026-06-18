@@ -2,7 +2,7 @@
   name = vicmaeg
   email = vmartos@outlook.com
 [core]
-  editor = nvim
+  editor = emacsclient -t
 [credential]
   helper = /mnt/c/Program\\ Files/Git/mingw64/bin/git-credential-manager.exe
 [color]

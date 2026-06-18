@@ -82,11 +82,8 @@ source $ZSH/oh-my-zsh.sh
 # export LANG=en_US.UTF-8
 
 # Preferred editor for local and remote sessions
-if [[ -n $SSH_CONNECTION ]]; then
-  export EDITOR='vim'
-else
-  export EDITOR='nvim'
-fi
+export EDITOR='emacsclient -t'
+export VISUAL='emacsclient -t'
 
 # Compilation flags
 # export ARCHFLAGS="-arch $(uname -m)"
@@ -108,6 +105,14 @@ source ~/.zsh_profile
 # Aliases
 alias lg=lazygit
 alias t=tmux-sessionizer
+
+# Emacs
+alias e='emacsclient -t'
+alias ec='nohup emacsclient -c -n < /dev/null > /dev/null 2>&1 &'
+alias emacsd='systemctl --user status emacs'
+alias emacsd-restart='systemctl --user restart emacs'
+alias emacsd-stop='systemctl --user stop emacs'
+alias emacs-install='emacs -nw'
 
 # START SSH AGENT and add ssh keys
 if ! pgrep -u "$USER" ssh-agent >/dev/null; then
