@@ -1,3 +1,4 @@
+PATH="$PATH:$HOME/.dotnet"
 PATH="$PATH:$HOME/.dotnet/tools"
 PATH="$PATH:$HOME/.local/tmux-sessionizer"
 PATH="$PATH:$HOME/.opencode/bin"
