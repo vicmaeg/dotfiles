@@ -1,0 +1,91 @@
+onboarding = false
+[ui]
+agent_panel_sort = "spaces"
+# Let the host terminal draw the cursor instead of herdr's cell-drawn one,
+# so cursor-shape changes (DECSCUSR, e.g. meow's bar/block) show through.
+host_cursor = "native"
+# Disable herdr's mouse UI. While mouse capture is active, herdr holds a lone
+# ESC for 150ms (vs 10ms) to disambiguate SGR mouse sequences, which delays
+# ESC and merges ESC+key into Alt+key for the pane (breaks meow in emacs -nw).
+# Pane apps that request mouse reporting themselves still get the mouse.
+mouse_capture = false
+
+[theme]
+name = "kanagawa"
+auto_switch = false
+
+# Full explicit keymap. Scheme: prefix-first so nothing is stolen from
+# shells/editors; shift = destructive/secondary variant; modifier ladder for
+# indexed jumps: plain = tab, shift = workspace, alt = agent.
+[keys]
+prefix = "ctrl+b"
+
+# Help / session
+help = "prefix+?"
+settings = "prefix+s"
+detach = "prefix+q"
+reload_config = "prefix+shift+r"
+open_notification_target = "prefix+o"
+toggle_sidebar = "prefix+b"
+
+# Navigation surfaces
+workspace_picker = "prefix+w"
+goto = "prefix+g"
+
+# Workspaces (shift family)
+new_workspace = "prefix+shift+n"
+rename_workspace = "prefix+shift+w"
+close_workspace = "prefix+shift+d"
+previous_workspace = "prefix+shift+up"
+next_workspace = "prefix+shift+down"
+switch_workspace = "prefix+shift+1..9"
+
+# Worktrees (g family)
+new_worktree = "prefix+shift+g"
+open_worktree = "prefix+alt+g"
+remove_worktree = "prefix+alt+shift+g"
+
+# Agents (alt family)
+focus_agent = "prefix+alt+1..9"
+previous_agent = "prefix+alt+p"
+next_agent = "prefix+alt+n"
+
+# Tabs
+new_tab = "prefix+c"
+rename_tab = "prefix+shift+t"
+close_tab = "prefix+shift+x"
+previous_tab = "prefix+p"
+next_tab = "prefix+n"
+switch_tab = "prefix+1..9"
+
+# Panes
+focus_pane_left = "prefix+h"
+focus_pane_down = "prefix+j"
+focus_pane_up = "prefix+k"
+focus_pane_right = "prefix+l"
+swap_pane_left = "prefix+shift+h"
+swap_pane_down = "prefix+shift+j"
+swap_pane_up = "prefix+shift+k"
+swap_pane_right = "prefix+shift+l"
+cycle_pane_next = "prefix+tab"
+cycle_pane_previous = "prefix+shift+tab"
+last_pane = "prefix+;"
+split_vertical = "prefix+v"
+split_horizontal = "prefix+minus"
+close_pane = "prefix+x"
+zoom = "prefix+z"
+resize_mode = "prefix+r"
+rename_pane = "prefix+shift+p"
+edit_scrollback = "prefix+e"
+copy_mode = "prefix+["
+
+# Remote image paste (only active in herdr --remote)
+remote_image_paste = "ctrl+v"
+
+# Navigate mode
+navigate_workspace_up = "up"
+navigate_workspace_down = "down"
+navigate_pane_left = "h"
+navigate_pane_down = "j"
+navigate_pane_up = "k"
+navigate_pane_right = "l"
