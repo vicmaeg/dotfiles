@@ -7,6 +7,7 @@ o.undofile = true
 o.ignorecase = true
 o.smartcase = true
 o.clipboard = "unnamedplus"
+o.autoread = true -- reload files changed on disk (e.g. by an agent) on focus/buffer switch
 
 o.expandtab = true
 o.shiftwidth = 2

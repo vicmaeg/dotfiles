@@ -13,6 +13,7 @@ LSP, native statusline, built-in colorscheme.
 | `ibhagwan/fzf-lua` | Files / live grep / buffers |
 | `stevearc/oil.nvim` | File explorer (takes over directory buffers) |
 | `lewis6991/gitsigns.nvim` | Hunk signs + navigation |
+| `dlyongemallo/diffview-plus.nvim` | Live diff dashboard (maintained diffview fork) |
 | `nvim-treesitter/nvim-treesitter` (`main` branch) | Highlighting |
 
 Manage plugins with `:packupdate` (review buffer, `:w` to confirm) and
@@ -44,6 +45,8 @@ lua/
 |-----|--------|
 | `<leader>ff` / `<leader>fg` / `<leader>fb` | fzf-lua files / live grep / buffers |
 | `<leader>gg` | fugitive `:Git` status |
+| `<leader>gd` | diffview+: toggle diff view (right pane is editable) |
+| `<leader>gR` | Reload files changed on disk + refresh diff view |
 | `[h` / `]h` | gitsigns prev/next hunk |
 | `-` | oil: parent of current file |
 | `<leader>e` | oil: project root (`.git` marker) |

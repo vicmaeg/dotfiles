@@ -4,6 +4,7 @@ vim.pack.add({
 	"https://github.com/ibhagwan/fzf-lua",
 	"https://github.com/stevearc/oil.nvim",
 	"https://github.com/lewis6991/gitsigns.nvim",
+	"https://github.com/dlyongemallo/diffview-plus.nvim",
 	{ src = "https://github.com/nvim-treesitter/nvim-treesitter", version = "main" },
 }, { confirm = false })
 
@@ -27,6 +28,10 @@ require("gitsigns").setup({
 			g.nav_hunk("prev")
 		end)
 	end,
+})
+
+require("diffview").setup({
+	use_icons = false, -- no devicons/mini.icons installed
 })
 
 require("nvim-treesitter").setup({

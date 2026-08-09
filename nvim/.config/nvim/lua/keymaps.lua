@@ -13,6 +13,11 @@ end, { desc = "Buffers" })
 
 -- git
 map("n", "<leader>gg", ":Git<cr>", { desc = "Git status (fugitive)" })
+map("n", "<leader>gd", ":DiffviewToggle<cr>", { desc = "Diff view (diffview+)" })
+map("n", "<leader>gR", function()
+	vim.cmd("silent! checktime") -- reload buffers changed on disk
+	pcall(vim.cmd, "DiffviewRefresh") -- no-op outside a diffview
+end, { desc = "Refresh diff view + reload changed files" })
 
 -- oil
 map("n", "-", function()

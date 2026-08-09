@@ -1,5 +1,9 @@
 {
   "plugins": {
+    "diffview-plus.nvim": {
+      "rev": "62dc5adf4e77489a2a6d3bf36ef6e4ac5738b634",
+      "src": "https://github.com/dlyongemallo/diffview-plus.nvim"
+    },
     "fzf-lua": {
       "rev": "8671012a7b2a1648595952c655039d51fb301c14",
       "src": "https://github.com/ibhagwan/fzf-lua"
