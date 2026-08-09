@@ -10,3 +10,4 @@ fi
 
 alias lg=lazygit
 alias t=tmux-sessionizer
+alias hw=herdr-workspacer

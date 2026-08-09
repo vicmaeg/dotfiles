@@ -1,0 +1,36 @@
+#!/usr/bin/env bash
+# herdr-workspacer: jump to a herdr workspace via fzf. Existing workspaces are
+# listed first as "[workspace] <label>", followed by zoxide entries. Zoxide
+# directories are matched by label (= directory basename), like tmux-sessionizer
+# matches session names: same-basename directories share one workspace.
+set -euo pipefail
+
+for cmd in herdr zoxide fzf jq; do
+    command -v "$cmd" &>/dev/null || { echo "herdr-workspacer: $cmd is required" >&2; exit 1; }
+done
+
+list_workspaces() {
+    herdr workspace list | jq -r '.result.workspaces[] | select(.focused | not) | "[workspace] \(.label)"'
+}
+
+if [[ $# -gt 0 ]]; then
+    selected=$(zoxide query "$@") || exit 1          # direct keyword: herdr-workspacer dotfiles
+else
+    selected=$( { list_workspaces; zoxide query --list; } | fzf --prompt="workspace> ") || exit 0
+fi
+[[ -z $selected ]] && exit 0
+
+if [[ $selected =~ ^\[workspace\]\ (.+)$ ]]; then
+    name="${BASH_REMATCH[1]}"
+else
+    name=$(basename "$selected")
+fi
+
+wid=$(herdr workspace list | jq -r --arg name "$name" \
+    'first(.result.workspaces[] | select(.label == $name) | .workspace_id) // empty')
+
+if [[ -n $wid ]]; then
+    herdr workspace focus "$wid" >/dev/null
+else
+    herdr workspace create --cwd "$selected" --label "$name" --focus >/dev/null
+fi

@@ -84,3 +84,11 @@ navigate_pane_left = "h"
 navigate_pane_down = "j"
 navigate_pane_up = "k"
 navigate_pane_right = "l"
+
+# Zoxide workspace sessionizer popup (herdr-workspacer)
+[[keys.command]]
+key = "prefix+f"
+type = "popup"
+command = "herdr-workspacer"
+width = "80%"
+height = "80%"

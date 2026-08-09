@@ -9,6 +9,7 @@ export VISUAL='nvim'
 
 alias lg=lazygit
 alias t=tmux-sessionizer
+alias hw=herdr-workspacer
 alias ls=eza
 alias cd=z
 alias v=nvim

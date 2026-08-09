@@ -105,6 +105,7 @@ source ~/.zsh_profile
 # Aliases
 alias lg=lazygit
 alias t=tmux-sessionizer
+alias hw=herdr-workspacer
 
 # Emacs
 alias e='emacsclient -t'
