@@ -6,6 +6,7 @@ o.signcolumn = "yes"
 o.undofile = true
 o.ignorecase = true
 o.smartcase = true
+o.clipboard = "unnamedplus"
 
 o.expandtab = true
 o.shiftwidth = 2
