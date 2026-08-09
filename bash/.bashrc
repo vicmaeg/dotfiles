@@ -4,8 +4,8 @@ PATH="$PATH:$HOME/.local/tmux-sessionizer"
 PATH="$PATH:$HOME/.opencode/bin"
 PATH="$PATH:$HOME/.local/bin"
 
-export EDITOR='emacsclient -t'
-export VISUAL='emacsclient -t'
+export EDITOR='nvim'
+export VISUAL='nvim'
 
 alias lg=lazygit
 alias t=tmux-sessionizer
