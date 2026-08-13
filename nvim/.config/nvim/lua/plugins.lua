@@ -4,6 +4,7 @@ vim.pack.add({
 	"https://github.com/ibhagwan/fzf-lua",
 	"https://github.com/stevearc/oil.nvim",
 	"https://github.com/lewis6991/gitsigns.nvim",
+	"https://github.com/barrettruth/diffs.nvim",
 	{ src = "https://github.com/nvim-treesitter/nvim-treesitter", version = "main" },
 }, { confirm = false })
 
@@ -28,6 +29,17 @@ require("gitsigns").setup({
 		end)
 	end,
 })
+
+vim.g.diffs = {
+	view = {
+		default_layout = "split",
+		prefix = false,
+	},
+	integrations = {
+		fugitive = true,
+		gitsigns = true,
+	},
+}
 
 require("nvim-treesitter").setup({
 	ensure_install = {

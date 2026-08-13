@@ -1,5 +1,9 @@
 {
   "plugins": {
+    "diffs.nvim": {
+      "rev": "1bfda486a689b78a01f636e01c0f8d5be419d3a4",
+      "src": "https://github.com/barrettruth/diffs.nvim"
+    },
     "fzf-lua": {
       "rev": "8671012a7b2a1648595952c655039d51fb301c14",
       "src": "https://github.com/ibhagwan/fzf-lua"
