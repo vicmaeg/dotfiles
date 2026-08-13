@@ -5,6 +5,7 @@ vim.pack.add({
 	"https://github.com/stevearc/oil.nvim",
 	"https://github.com/lewis6991/gitsigns.nvim",
 	"https://github.com/barrettruth/diffs.nvim",
+	"https://github.com/nvim-orgmode/orgmode",
 	{ src = "https://github.com/nvim-treesitter/nvim-treesitter", version = "main" },
 }, { confirm = false })
 
@@ -40,6 +41,11 @@ vim.g.diffs = {
 		gitsigns = true,
 	},
 }
+
+require("orgmode").setup({
+	org_agenda_files = "~/org/**/*",
+	org_default_notes_file = "~/org/inbox.org",
+})
 
 require("nvim-treesitter").setup({
 	ensure_install = {

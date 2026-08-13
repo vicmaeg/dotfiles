@@ -11,6 +11,11 @@ map("n", "<leader>fb", function()
 	require("fzf-lua").buffers()
 end, { desc = "Buffers" })
 
+-- org
+map("n", "<leader>of", function()
+	require("fzf-lua").files({ cwd = "~/org" })
+end, { desc = "Find org files" })
+
 -- git
 map("n", "<leader>gg", ":Git<cr>", { desc = "Git status (fugitive)" })
 
