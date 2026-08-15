@@ -1,15 +1,28 @@
+vim.g.diffs = {
+	integrations = {
+		fugitive = true,
+		gitsigns = true,
+	},
+}
+
 vim.pack.add({
-	"https://github.com/tpope/vim-fugitive",
 	"https://github.com/tpope/vim-surround",
 	"https://github.com/ibhagwan/fzf-lua",
 	"https://github.com/stevearc/oil.nvim",
-	"https://github.com/lewis6991/gitsigns.nvim",
 	"https://github.com/barrettruth/diffs.nvim",
+	"https://github.com/tpope/vim-fugitive",
+	"https://github.com/lewis6991/gitsigns.nvim",
 	"https://github.com/nvim-orgmode/orgmode",
 	{ src = "https://github.com/nvim-treesitter/nvim-treesitter", version = "main" },
 }, { confirm = false })
 
-require("fzf-lua").setup({ fzf_colors = true })
+require("fzf-lua").setup({
+	"ivy",
+	fzf_colors = true,
+	winopts = {
+		preview = { hidden = true },
+	},
+})
 
 require("oil").setup({
 	default_file_explorer = true, -- take over directory buffers (netrw's job)
@@ -30,17 +43,6 @@ require("gitsigns").setup({
 		end)
 	end,
 })
-
-vim.g.diffs = {
-	view = {
-		default_layout = "split",
-		prefix = false,
-	},
-	integrations = {
-		fugitive = true,
-		gitsigns = true,
-	},
-}
 
 require("orgmode").setup({
 	org_agenda_files = "~/org/**/*",
