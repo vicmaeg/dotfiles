@@ -1,4 +1,5 @@
-PATH="$PATH:$HOME/.dotnet"
+export DOTNET_ROOT="$HOME/.dotnet"
+PATH="$HOME/.dotnet:$PATH"
 PATH="$PATH:$HOME/.dotnet/tools"
 PATH="$PATH:$HOME/.local/tmux-sessionizer"
 PATH="$PATH:$HOME/.opencode/bin"
