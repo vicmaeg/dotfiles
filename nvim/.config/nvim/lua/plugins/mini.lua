@@ -1,0 +1,47 @@
+vim.pack.add({ "https://github.com/nvim-mini/mini.nvim" }, { confirm = false })
+
+require("mini.icons").setup()
+require("mini.ai").setup()
+require("mini.surround").setup()
+require("mini.completion").setup({
+	window = {
+		info = { border = "rounded" },
+		signature = { border = "rounded" },
+	},
+})
+require("mini.jump").setup()
+require("mini.jump2d").setup()
+require("mini.pick").setup()
+require("mini.statusline").setup({ use_icons = true })
+require("mini.files").setup({
+	options = {
+		use_as_default_explorer = true,
+	},
+})
+
+vim.keymap.set("n", "<leader>e", function()
+	local path = vim.api.nvim_buf_get_name(0)
+	require("mini.files").open(path ~= "" and path or vim.uv.cwd())
+end, { desc = "Files: current file" })
+
+vim.keymap.set("n", "<leader>E", function()
+	local root = vim.fs.root(0, { ".git" }) or vim.uv.cwd()
+	require("mini.files").open(root)
+end, { desc = "Files: project root" })
+
+local pick = require("mini.pick")
+vim.keymap.set("n", "<leader>pf", function()
+	pick.builtin.files()
+end, { desc = "Pick: files" })
+vim.keymap.set("n", "<leader>pg", function()
+	pick.builtin.grep_live()
+end, { desc = "Pick: live grep" })
+vim.keymap.set("n", "<leader>pb", function()
+	pick.builtin.buffers()
+end, { desc = "Pick: buffers" })
+vim.keymap.set("n", "<leader>ph", function()
+	pick.builtin.help()
+end, { desc = "Pick: help" })
+vim.keymap.set("n", "<leader>pr", function()
+	pick.builtin.resume()
+end, { desc = "Pick: resume" })

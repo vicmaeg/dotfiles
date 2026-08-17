@@ -2,16 +2,15 @@
 
 Neovim config (0.12+) with a handful of focused plugins managed by the
 built-in `vim.pack` plugin manager. No plugin-manager wrapper, no mason, native
-LSP, native statusline, built-in colorscheme.
+LSP, mini.nvim UI modules, built-in colorscheme.
 
 ## Plugins
 
 | Plugin | Role |
 |--------|------|
+| `nvim-mini/mini.nvim` | Icons, textobjects, surround, completion, jumps, fallback picker, statusline, file explorer |
 | `tpope/vim-fugitive` | Git client |
-| `tpope/vim-surround` | Surround operations |
 | `ibhagwan/fzf-lua` | Files / live grep / buffers |
-| `stevearc/oil.nvim` | File explorer (takes over directory buffers) |
 | `lewis6991/gitsigns.nvim` | Hunk signs + navigation |
 | `barrettruth/diffs.nvim` | Diff views integrated with Fugitive and Gitsigns |
 | `nvim-orgmode/orgmode` | Org files and agenda |
@@ -22,8 +21,8 @@ LSP, native statusline, built-in colorscheme.
 | `nvim-lua/plenary.nvim` | Lua library (easy-dotnet dependency) |
 
 Manage plugins with `:lua vim.pack.update()` (review the update buffer, `:w` to
-confirm) and `:packdel <name>`. To inspect plugin state without network access,
-run `:lua vim.pack.update(nil, { offline = true })`. The lockfile
+confirm) and `:lua vim.pack.del({ "name" })`. To inspect plugin state without
+network access, run `:lua vim.pack.update(nil, { offline = true })`. The lockfile
 `nvim-pack-lock.json` lives next to this file — commit it for reproducible setups.
 
 ## Structure
@@ -40,9 +39,9 @@ lua/
   plugins/*.lua         -- one vim.pack.add + setup() module per plugin
   keymaps.lua           -- general keymaps; plugin maps live with plugins
   autocmds.lua          -- yank highlight, restore cursor
-  statusline.lua        -- native: mode | git branch | path | diags | ft
+  plugins/mini.lua      -- mini.nvim modules and plugin-specific keymaps
   diagnostics.lua
-  lsp.lua               -- vim.lsp.enable + builtin completion on attach
+  lsp.lua               -- vim.lsp.enable
   formatting.lua        -- stylua for lua, else LSP format on save
   colors.lua            -- habamax
 ```
@@ -58,8 +57,12 @@ This keeps dependencies and behavior together while leaving the top-level
 | `<leader>ff` / `<leader>fg` / `<leader>fb` | fzf-lua files / live grep / buffers |
 | `<leader>gg` | fugitive `:Git` status |
 | `[h` / `]h` | gitsigns prev/next hunk |
-| `-` | oil: parent of current file |
-| `<leader>e` | oil: project root (`.git` marker) |
+| `<leader>e` | mini.files: current file or directory |
+| `<leader>E` | mini.files: project root (`.git` marker) |
+| `sa` / `sd` / `sr` | mini.surround: add / delete / replace |
+| `<leader>pf` / `<leader>pg` / `<leader>pb` | mini.pick: files / live grep / buffers |
+| `<leader>ph` / `<leader>pr` | mini.pick: help / resume |
+| `<CR>` | mini.jump2d: jump within visible lines |
 | `<leader>ld` | diagnostics to quickfix |
 | `<C-h/j/k/l>` | window navigation |
 | `<F5>` / `<F10>` / `<F11>` / `<F12>` | debug: continue / step over / step into / step out |
@@ -71,7 +74,9 @@ In C# buffers easy-dotnet adds: `<leader>tr` run test, `<leader>tf` run file,
 `<leader>td` debug test, `<leader>tp` peek stacktrace, `<leader>te` build errors.
 
 Everything else relies on stock defaults: `grn`, `grr`, `gri`, `gra`, `gO`,
-`K`, `[d` `]d`, `[q` `]q`, LSP completion via builtin `vim.lsp.completion`.
+`K`, `[d` `]d`, `[q` `]q`. `mini.jump` extends `f`, `F`, `t`, and `T` across
+lines, while `mini.ai` adds textobjects and `mini.completion` handles LSP
+completion and signature help.
 
 ## System dependencies
 

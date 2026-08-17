@@ -1,7 +1,6 @@
 -- Load plugin modules in a predictable order.
-require("plugins.surround")
+require("plugins.mini")
 require("plugins.fzf-lua")
-require("plugins.oil")
 require("plugins.diffs")
 require("plugins.fugitive")
 require("plugins.gitsigns")
