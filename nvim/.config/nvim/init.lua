@@ -1,12 +1,15 @@
 vim.g.mapleader = " "
 vim.g.maplocalleader = " "
 
+vim.loader.enable()
+
 require("options")
-require("colors")
-require("plugins")
-require("statusline")
-require("diagnostics")
-require("lsp")
-require("formatting")
-require("autocmds")
 require("keymaps")
+require("autocmds")
+require("diagnostics")
+require("colors")
+require("statusline")
+require("pack")
+require("plugins")
+require("formatting")
+require("lsp")

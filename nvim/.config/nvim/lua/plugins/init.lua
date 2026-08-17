@@ -1,0 +1,11 @@
+-- Load plugin modules in a predictable order.
+require("plugins.surround")
+require("plugins.fzf-lua")
+require("plugins.oil")
+require("plugins.diffs")
+require("plugins.fugitive")
+require("plugins.gitsigns")
+require("plugins.orgmode")
+require("plugins.treesitter")
+require("plugins.dap")
+require("plugins.easy-dotnet")

@@ -13,15 +13,18 @@ LSP, native statusline, built-in colorscheme.
 | `ibhagwan/fzf-lua` | Files / live grep / buffers |
 | `stevearc/oil.nvim` | File explorer (takes over directory buffers) |
 | `lewis6991/gitsigns.nvim` | Hunk signs + navigation |
+| `barrettruth/diffs.nvim` | Diff views integrated with Fugitive and Gitsigns |
+| `nvim-orgmode/orgmode` | Org files and agenda |
 | `nvim-treesitter/nvim-treesitter` (`main` branch) | Highlighting |
 | `GustavEikaas/easy-dotnet.nvim` | .NET: Roslyn LSP, test runner, build/run, debugging bootstrap |
 | `mfussenegger/nvim-dap` | Debug adapter protocol client |
 | `rcarriga/nvim-dap-ui` (+ `nvim-neotest/nvim-nio`) | Debug UI (scopes, stacks, watches) |
 | `nvim-lua/plenary.nvim` | Lua library (easy-dotnet dependency) |
 
-Manage plugins with `:packupdate` (review buffer, `:w` to confirm) and
-`:packdel <name>`. The lockfile `nvim-pack-lock.json` lives next to this file —
-commit it for reproducible setups.
+Manage plugins with `:lua vim.pack.update()` (review the update buffer, `:w` to
+confirm) and `:packdel <name>`. To inspect plugin state without network access,
+run `:lua vim.pack.update(nil, { offline = true })`. The lockfile
+`nvim-pack-lock.json` lives next to this file — commit it for reproducible setups.
 
 ## Structure
 
@@ -31,9 +34,11 @@ lsp/
   lua_ls.lua            -- Lua (lua-language-server)
   easy_dotnet.lua       -- C# (Roslyn) settings; server started by easy-dotnet.nvim
 lua/
-  options.lua           -- sane defaults, 0.11/0.12 native features
-  plugins.lua           -- vim.pack.add + setup() calls
-  keymaps.lua
+  options.lua           -- sane defaults, 0.12 native features
+  pack.lua              -- vim.pack lifecycle and build hooks
+  plugins/init.lua      -- ordered plugin module loader
+  plugins/*.lua         -- one vim.pack.add + setup() module per plugin
+  keymaps.lua           -- general keymaps; plugin maps live with plugins
   autocmds.lua          -- yank highlight, restore cursor
   statusline.lua        -- native: mode | git branch | path | diags | ft
   diagnostics.lua
@@ -41,6 +46,10 @@ lua/
   formatting.lua        -- stylua for lua, else LSP format on save
   colors.lua            -- habamax
 ```
+
+Each plugin module owns its installation, setup, and plugin-specific keymaps.
+This keeps dependencies and behavior together while leaving the top-level
+`init.lua` as a short, explicit load order.
 
 ## Keymaps
 
@@ -51,7 +60,7 @@ lua/
 | `[h` / `]h` | gitsigns prev/next hunk |
 | `-` | oil: parent of current file |
 | `<leader>e` | oil: project root (`.git` marker) |
-| `<leader>q` | diagnostics to quickfix |
+| `<leader>ld` | diagnostics to quickfix |
 | `<C-h/j/k/l>` | window navigation |
 | `<F5>` / `<F10>` / `<F11>` / `<F12>` | debug: continue / step over / step into / step out |
 | `<leader>b` / `<leader>B` | debug: toggle / conditional breakpoint |
