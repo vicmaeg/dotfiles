@@ -6,7 +6,7 @@ agent_panel_sort = "spaces"
 host_cursor = "native"
 
 [theme]
-name = "kanagawa"
+name = "gruvbox"
 auto_switch = false
 
 # Full explicit keymap. Scheme: prefix-first so nothing is stolen from
