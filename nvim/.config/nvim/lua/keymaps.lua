@@ -28,11 +28,46 @@ map("n", "<leader>e", function()
 	require("oil").open(root)
 end, { desc = "Oil: project root" })
 
--- diagnostics
-map("n", "<leader>d", function()
+-- LSP
+map("n", "grd", "<C-]>", { desc = "Go to definition" })
+map("n", "<leader>ld", function()
 	vim.diagnostic.setqflist()
 	vim.cmd("copen")
 end, { desc = "Diagnostics to quickfix" })
+
+-- dap
+map("n", "<F5>", function()
+	require("dap").continue()
+end, { desc = "Debug: start/continue" })
+map("n", "<F10>", function()
+	require("dap").step_over()
+end, { desc = "Debug: step over" })
+map("n", "<F11>", function()
+	require("dap").step_into()
+end, { desc = "Debug: step into" })
+map("n", "<F12>", function()
+	require("dap").step_out()
+end, { desc = "Debug: step out" })
+map("n", "<leader>b", function()
+	require("dap").toggle_breakpoint()
+end, { desc = "Debug: toggle breakpoint" })
+map("n", "<leader>B", function()
+	require("dap").set_breakpoint(vim.fn.input("Breakpoint condition: "))
+end, { desc = "Debug: conditional breakpoint" })
+map("n", "<leader>dq", function()
+	require("dap").terminate()
+end, { desc = "Debug: terminate" })
+map("n", "<leader>dr", function()
+	require("dap").repl.toggle()
+end, { desc = "Debug: toggle REPL" })
+map("n", "<leader>du", function()
+	require("dapui").toggle()
+end, { desc = "Debug: toggle UI" })
+
+-- easy-dotnet
+map("n", "<leader>tt", function()
+	vim.cmd("Dotnet testrunner")
+end, { desc = "Dotnet: toggle test runner" })
 
 -- window navigation
 map("n", "<C-h>", "<C-w>h")

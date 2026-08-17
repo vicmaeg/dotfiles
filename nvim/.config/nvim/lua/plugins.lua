@@ -14,6 +14,11 @@ vim.pack.add({
 	"https://github.com/lewis6991/gitsigns.nvim",
 	"https://github.com/nvim-orgmode/orgmode",
 	{ src = "https://github.com/nvim-treesitter/nvim-treesitter", version = "main" },
+	"https://github.com/nvim-lua/plenary.nvim",
+	"https://github.com/mfussenegger/nvim-dap",
+	"https://github.com/rcarriga/nvim-dap-ui",
+	"https://github.com/nvim-neotest/nvim-nio",
+	"https://github.com/GustavEikaas/easy-dotnet.nvim",
 }, { confirm = false })
 
 require("fzf-lua").setup({
@@ -61,4 +66,33 @@ require("nvim-treesitter").setup({
 		"vimdoc",
 	},
 	highlight = { enable = true },
+})
+
+local dap = require("dap")
+local dapui = require("dapui")
+dapui.setup()
+dap.listeners.before.attach.dapui_config = function()
+	dapui.open()
+end
+dap.listeners.before.launch.dapui_config = function()
+	dapui.open()
+end
+dap.listeners.before.event_terminated.dapui_config = function()
+	dapui.close()
+end
+dap.listeners.before.event_exited.dapui_config = function()
+	dapui.close()
+end
+
+require("easy-dotnet").setup({
+	picker = "fzf",
+	test_runner = {
+		mappings = {
+			run_test_from_buffer = { lhs = "<leader>tr", desc = "run test from buffer" },
+			run_all_tests_from_buffer = { lhs = "<leader>tf", desc = "run all tests in file" },
+			debug_test_from_buffer = { lhs = "<leader>td", desc = "debug test from buffer" },
+			peek_stack_trace_from_buffer = { lhs = "<leader>tp", desc = "peek stack trace from buffer" },
+			get_build_errors = { lhs = "<leader>te", desc = "get build errors" },
+		},
+	},
 })

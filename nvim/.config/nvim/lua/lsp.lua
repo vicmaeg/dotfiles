@@ -1,4 +1,5 @@
-vim.lsp.enable({ "lua_ls", "roslyn_ls" })
+-- C# (Roslyn) is started by easy-dotnet.nvim, see lsp/easy_dotnet.lua for its settings
+vim.lsp.enable({ "lua_ls" })
 
 vim.api.nvim_create_autocmd("LspAttach", {
 	group = vim.api.nvim_create_augroup("lsp-attach", { clear = true }),
