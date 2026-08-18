@@ -32,6 +32,15 @@ o.listchars = { tab = "» ", trail = "·", nbsp = "␣" }
 o.completeopt = { "menuone", "noselect", "fuzzy", "popup" }
 o.winborder = "rounded"
 
+o.wildmode = "noselect:lastused,full"
+o.wildoptions = "pum"
+
+if vim.fn.executable("rg") == 1 then
+	o.grepprg = "rg --vimgrep"
+	o.grepformat = "%f:%l:%c:%m"
+end
+
+
 vim.schedule(function()
 	vim.opt.clipboard = "unnamedplus"
 end)
