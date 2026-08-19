@@ -1,7 +1,6 @@
 vim.g.diffs = {
 	integrations = {
 		fugitive = true,
-		gitsigns = true,
 	},
 }
 

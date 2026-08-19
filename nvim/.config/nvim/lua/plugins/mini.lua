@@ -9,6 +9,10 @@ require("mini.completion").setup({
 		signature = { border = "rounded" },
 	},
 })
+require("mini.diff").setup()
+vim.keymap.set("n", "<leader>gd", function()
+	MiniDiff.toggle_overlay()
+end, { desc = "Git: toggle diff overlay" })
 require("mini.jump").setup()
 require("mini.jump2d").setup()
 require("mini.pick").setup()
