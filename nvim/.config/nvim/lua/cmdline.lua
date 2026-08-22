@@ -7,16 +7,33 @@ local M = {}
 
 local files_cache = {}
 local selected = nil
+local previous_pumheight = nil
+
+local function system_lines(cmd, quiet)
+	local result = vim.system(cmd, { text = true }):wait()
+	if result.code ~= 0 and result.code ~= 1 then
+		if not quiet then
+			vim.notify(result.stderr or (cmd[1] .. " failed"), vim.log.levels.WARN)
+		end
+		return {}
+	end
+
+	return vim.split(result.stdout or "", "\n", { plain = true, trimempty = true })
+end
 
 function M.find(arg, _)
 	if vim.tbl_isempty(files_cache) then
-		files_cache = vim.fn.globpath(".", "**", true, true)
-		files_cache = vim.tbl_filter(function(path)
-			return vim.fn.isdirectory(path) == 0
-		end, files_cache)
-		files_cache = vim.tbl_map(function(path)
-			return vim.fn.fnamemodify(path, ":.")
-		end, files_cache)
+		if vim.fn.executable("rg") == 1 then
+			files_cache = system_lines({ "rg", "--files", "--hidden", "--glob", "!.git" })
+		else
+			files_cache = vim.fn.globpath(".", "**", true, true)
+			files_cache = vim.tbl_filter(function(path)
+				return vim.fn.isdirectory(path) == 0
+			end, files_cache)
+			files_cache = vim.tbl_map(function(path)
+				return vim.fn.fnamemodify(path, ":.")
+			end, files_cache)
+		end
 	end
 	if arg == "" then
 		return files_cache
@@ -24,17 +41,13 @@ function M.find(arg, _)
 	return vim.fn.matchfuzzy(files_cache, arg)
 end
 
-function M.grep(arglead, _, _)
-	local grepprg = vim.o.grepprg
-	if not grepprg:find("%$%*", 1) then
-		vim.o.grepprg = grepprg .. " $*"
-		grepprg = vim.o.grepprg
-	end
-	if #arglead <= 1 then
+function M.grep(_, cmdline, cursorpos)
+	local query = cmdline:sub(1, cursorpos - 1):match("^%s*Grep%s+(.+)$") or ""
+	if #query <= 1 or vim.fn.executable("rg") ~= 1 then
 		return {}
 	end
-	local cmd = grepprg:gsub("%$%*", vim.fn.shellescape(vim.fn.escape(arglead, "\\")))
-	return vim.fn.systemlist(cmd)
+
+	return system_lines({ "rg", "--vimgrep", "--smart-case", "--hidden", "--glob", "!.git", "--", query }, true)
 end
 
 function M.visit_file()
@@ -50,7 +63,6 @@ function M.visit_file()
 	vim.bo[item.bufnr].buflisted = true
 	pcall(vim.api.nvim_win_set_cursor, 0, { item.lnum, math.max(item.col - 1, 0) })
 end
-
 
 vim.o.findfunc = "v:lua.require'cmdline'.find"
 
@@ -77,7 +89,8 @@ vim.api.nvim_create_autocmd("CmdlineEnter", {
 	group = augroup,
 	pattern = { "/", "?" },
 	callback = function()
-		vim.opt.pumheight = 8
+		previous_pumheight = vim.o.pumheight
+		vim.o.pumheight = 8
 	end,
 })
 
@@ -85,7 +98,10 @@ vim.api.nvim_create_autocmd("CmdlineLeave", {
 	group = augroup,
 	pattern = { "/", "?" },
 	callback = function()
-		vim.opt.pumheight = vim.api.nvim_get_option_info2("pumheight", {}).default
+		if previous_pumheight ~= nil then
+			vim.o.pumheight = previous_pumheight
+			previous_pumheight = nil
+		end
 	end,
 })
 
@@ -94,6 +110,7 @@ vim.api.nvim_create_autocmd("CmdlineEnter", {
 	pattern = ":",
 	callback = function()
 		files_cache = {}
+		selected = nil
 	end,
 })
 
@@ -103,26 +120,28 @@ vim.api.nvim_create_autocmd("CmdlineLeavePre", {
 	callback = function()
 		local info = vim.fn.cmdcomplete_info()
 		local matches = info.matches or {}
+		local cmdline = vim.fn.getcmdline()
+
+		if cmdline:match("^%s*Grep%s") then
+			selected = nil
+			if vim.tbl_isempty(matches) then
+				return
+			end
+
+			-- Vim is 0-based for selected; Lua lists are 1-based.
+			selected = matches[(info.selected == -1 and 0 or info.selected) + 1]
+			vim.fn.setcmdline(info.cmdline_orig)
+			return
+		end
+
 		if vim.tbl_isempty(matches) then
 			return
 		end
 
-		local cmdline = vim.fn.getcmdline()
 		if cmdline:match("^%s*fin[d]?%s") and info.selected == -1 then
 			vim.fn.setcmdline("find " .. matches[1])
 		end
-
-		if cmdline:match("^%s*Grep%s") then
-			if info.selected ~= -1 then
-				-- Vim is 0-based for selected; Lua lists are 1-based
-				selected = matches[info.selected + 1]
-			else
-				selected = matches[1]
-			end
-			vim.fn.setcmdline(info.cmdline_orig)
-		end
 	end,
 })
-
 
 return M

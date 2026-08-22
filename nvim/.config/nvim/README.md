@@ -12,7 +12,7 @@ set of focused plugins.
 - **LSP**: native `vim.lsp` (`lua_ls`; C#/Roslyn via easy-dotnet)
 - **Completion**: mini.completion + native cmdline autocompletion
 - **Git**: fugitive (status/blame) + mini.diff (hunk signs) + diffs.nvim
-- **Pickers**: fzf-lua (primary) and mini.pick (fallback)
+- **Pickers**: mini.pick (primary) and fzf-lua (`<leader>fz` picker menu)
 
 ## Plugins
 
@@ -20,7 +20,7 @@ set of focused plugins.
 |--------|------|
 | `nvim-mini/mini.nvim` | icons, ai, surround, completion, diff, jump, jump2d, pick, statusline, files |
 | `tpope/vim-fugitive` | Git client (`:Git`, blame, etc.) |
-| `ibhagwan/fzf-lua` | Files / live grep / buffers (ivy layout) |
+| `ibhagwan/fzf-lua` | Secondary picker menu (ivy layout) |
 | `barrettruth/diffs.nvim` | Diff views (Fugitive integration) |
 | `nvim-orgmode/orgmode` | Org files and agenda (`~/org`) |
 | `nvim-treesitter/nvim-treesitter` (`main`) | Highlighting + indent |
@@ -38,12 +38,13 @@ for reproducible setups.
 
 ```
 init.lua                -- leader, vim.loader, module load order
+ripgreprc               -- include hidden files, exclude .git from rg-backed pickers
 lsp/
   lua_ls.lua            -- Lua language server config
   easy_dotnet.lua       -- C# (Roslyn) settings; server started by easy-dotnet
 lua/
   options.lua           -- defaults, wildmode/pum, rg grepprg
-  keymaps.lua           -- general + cmdline history maps
+  keymaps.lua           -- general keymaps
   autocmds.lua          -- yank highlight, restore cursor
   cmdline.lua           -- cmdline autocompletion, fuzzy :find, live :Grep
   diagnostics.lua       -- diagnostic UI
@@ -51,7 +52,7 @@ lua/
   pack.lua              -- vim.pack hooks (TSUpdate on treesitter install/update)
   plugins/init.lua      -- ordered plugin loader
   plugins/*.lua         -- one vim.pack.add + setup per plugin
-  formatting.lua        -- stylua for lua, else LSP format on save
+  formatting.lua        -- diff-based stylua formatting, else one selected LSP formatter
   lsp.lua               -- vim.lsp.enable
 ```
 
@@ -62,10 +63,10 @@ short explicit load order.
 
 | Key | Action |
 |-----|--------|
-| `<leader>ff` / `<leader>fg` / `<leader>fb` | fzf-lua: files / live grep / buffers |
-| `<leader>of` | fzf-lua: files in `~/org` |
-| `<leader>pf` / `<leader>pg` / `<leader>pb` | mini.pick: files / live grep / buffers |
-| `<leader>ph` / `<leader>pr` | mini.pick: help / resume |
+| `<leader>ff` / `<leader>fg` / `<leader>fb` | mini.pick: files (including dotfiles) / live ripgrep (including dotfiles) / buffers |
+| `<leader>fh` / `<leader>fr` | mini.pick: help / resume |
+| `<leader>fz` | fzf-lua: choose an internal picker |
+| `<leader>of` | mini.pick: files in `~/org` |
 | `<leader>e` / `<leader>E` | mini.files: current path / project root |
 | `<leader>gg` | fugitive `:Git` status |
 | `[h` / `]h` | mini.diff: prev / next hunk |
@@ -96,10 +97,11 @@ and signature help.
 Native cmdline autocompletion (Neovim 0.12+):
 
 - Popup suggestions while typing on `:`, `/`, and `?` (`Tab` / `<C-n>` / `<C-p>` to cycle)
-- **`:find <query>`** — fuzzy file picker (`findfunc` + cache)
-- **`:Grep <pattern>`** — live ripgrep results as you type (after 2 chars)
+- **`:find <query>`** — fuzzy file picker over `rg --files` (`findfunc` + cache)
+- **`:Grep <pattern>`** — live ripgrep results as you type (after 2 chars, including multiword patterns)
 
 Requires `rg` on `PATH` for `:Grep` / `grepprg`.
+The bundled `ripgreprc` makes rg-backed pickers include dotfiles while excluding `.git`.
 
 ## Treesitter parsers
 
@@ -120,3 +122,4 @@ opened (if available).
 
 `roslyn-language-server` and netcoredbg are installed/managed by easy-dotnet.
 Optional: `vscode-langservers-extracted` (npm) for HTML support in Razor files.
+The unused Node, Perl, Python, and Ruby remote providers are disabled.

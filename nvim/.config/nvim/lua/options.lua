@@ -40,7 +40,6 @@ if vim.fn.executable("rg") == 1 then
 	o.grepformat = "%f:%l:%c:%m"
 end
 
-
 vim.schedule(function()
 	vim.opt.clipboard = "unnamedplus"
 end)

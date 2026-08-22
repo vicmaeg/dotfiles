@@ -1,5 +1,7 @@
 vim.pack.add({ "https://github.com/nvim-mini/mini.nvim" }, { confirm = false })
 
+vim.env.RIPGREP_CONFIG_PATH = vim.fs.joinpath(vim.fn.stdpath("config"), "ripgreprc")
+
 require("mini.icons").setup()
 require("mini.ai").setup()
 require("mini.surround").setup()
@@ -15,7 +17,13 @@ vim.keymap.set("n", "<leader>gd", function()
 end, { desc = "Git: toggle diff overlay" })
 require("mini.jump").setup()
 require("mini.jump2d").setup()
-require("mini.pick").setup()
+require("mini.pick").setup({
+	window = {
+		config = function()
+			return { width = vim.o.columns }
+		end,
+	},
+})
 require("mini.statusline").setup({ use_icons = true })
 require("mini.files").setup({
 	options = {
@@ -34,18 +42,21 @@ vim.keymap.set("n", "<leader>E", function()
 end, { desc = "Files: project root" })
 
 local pick = require("mini.pick")
-vim.keymap.set("n", "<leader>pf", function()
+vim.keymap.set("n", "<leader>ff", function()
 	pick.builtin.files()
-end, { desc = "Pick: files" })
-vim.keymap.set("n", "<leader>pg", function()
-	pick.builtin.grep_live()
-end, { desc = "Pick: live grep" })
-vim.keymap.set("n", "<leader>pb", function()
+end, { desc = "Find files" })
+vim.keymap.set("n", "<leader>fg", function()
+	pick.builtin.grep_live({ tool = "rg" })
+end, { desc = "Live grep" })
+vim.keymap.set("n", "<leader>fb", function()
 	pick.builtin.buffers()
-end, { desc = "Pick: buffers" })
-vim.keymap.set("n", "<leader>ph", function()
+end, { desc = "Find buffers" })
+vim.keymap.set("n", "<leader>fh", function()
 	pick.builtin.help()
-end, { desc = "Pick: help" })
-vim.keymap.set("n", "<leader>pr", function()
+end, { desc = "Find help" })
+vim.keymap.set("n", "<leader>fr", function()
 	pick.builtin.resume()
-end, { desc = "Pick: resume" })
+end, { desc = "Resume picker" })
+vim.keymap.set("n", "<leader>of", function()
+	pick.builtin.files(nil, { source = { cwd = vim.fs.normalize("~/org") } })
+end, { desc = "Find org files" })
