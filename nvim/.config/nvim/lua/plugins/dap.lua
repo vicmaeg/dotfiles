@@ -7,6 +7,23 @@ vim.pack.add({
 local dap = require("dap")
 local dapui = require("dapui")
 
+dap.adapters.netcoredbg = function(callback)
+	local command = vim.fn.exepath("netcoredbg")
+	if command == "" then
+		vim.notify(
+			"netcoredbg is required to debug .NET tests; install it and ensure it is on PATH",
+			vim.log.levels.ERROR
+		)
+		return
+	end
+
+	callback({
+		type = "executable",
+		command = command,
+		args = { "--interpreter=vscode" },
+	})
+end
+
 dapui.setup()
 dap.listeners.after.event_initialized["dapui_config"] = dapui.open
 dap.listeners.before.event_terminated["dapui_config"] = dapui.close

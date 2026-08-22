@@ -1,10 +1,3 @@
----@brief
----
---- Settings for the Roslyn LSP started by easy-dotnet.nvim (lsp.enabled = true).
---- easy-dotnet merges this config on top of its own defaults.
---- The server binary (roslyn-language-server) is installed/updated by the plugin.
---- See: https://github.com/GustavEikaas/easy-dotnet.nvim/blob/main/docs/lsp.md
-
 ---@type vim.lsp.Config
 return {
 	settings = {
