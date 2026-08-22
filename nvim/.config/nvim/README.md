@@ -9,7 +9,7 @@ set of focused plugins.
 - **Leader**: `<Space>`
 - **Colorscheme**: `retrobox`
 - **Plugins**: `vim.pack` + lockfile (`nvim-pack-lock.json`)
-- **LSP**: native `vim.lsp` (`lua_ls`; C#/Roslyn via easy-dotnet)
+- **LSP**: native `vim.lsp` (`lua_ls`, `roslyn_ls`)
 - **Completion**: mini.completion + native cmdline autocompletion
 - **Git**: fugitive (status/blame) + mini.diff (hunk signs) + diffs.nvim
 - **Pickers**: mini.pick (primary) and fzf-lua (`<leader>fz` picker menu)
@@ -24,9 +24,11 @@ set of focused plugins.
 | `barrettruth/diffs.nvim` | Diff views (Fugitive integration) |
 | `nvim-orgmode/orgmode` | Org files and agenda (`~/org`) |
 | `nvim-treesitter/nvim-treesitter` (`main`) | Highlighting + indent |
-| `GustavEikaas/easy-dotnet.nvim` | .NET: Roslyn LSP, tests, build/run, debug bootstrap |
+| `neovim/nvim-lspconfig` | Maintained native LSP configurations, including `roslyn_ls` |
+| `nvim-neotest/neotest` + `nsidorenco/neotest-vstest` | .NET test discovery, execution, output, and DAP debugging |
+| `GustavEikaas/easy-dotnet.nvim` | Optional on-demand .NET command and alternative test runner |
 | `mfussenegger/nvim-dap` | Debug adapter protocol client |
-| `rcarriga/nvim-dap-ui` (+ `nvim-neotest/nvim-nio`) | Debug UI |
+| `rcarriga/nvim-dap-ui` (+ `nvim-neotest/nvim-nio`) | Debug UI and Neotest async support |
 | `nvim-lua/plenary.nvim` | Lua library (easy-dotnet dependency) |
 
 Manage plugins with `:lua vim.pack.update()` (review the update buffer, `:w` to
@@ -39,9 +41,8 @@ for reproducible setups.
 ```
 init.lua                -- leader, vim.loader, module load order
 ripgreprc               -- include hidden files, exclude .git from rg-backed pickers
-lsp/
-  lua_ls.lua            -- Lua language server config
-  easy_dotnet.lua       -- C# (Roslyn) settings; server started by easy-dotnet
+after/lsp/
+  roslyn_ls.lua         -- local Roslyn settings layered on nvim-lspconfig
 lua/
   options.lua           -- defaults, wildmode/pum, rg grepprg
   keymaps.lua           -- general keymaps
@@ -82,10 +83,13 @@ short explicit load order.
 | `<F5>` / `<F10>` / `<F11>` / `<F12>` | debug: continue / step over / into / out |
 | `<leader>b` / `<leader>B` | debug: toggle / conditional breakpoint |
 | `<leader>dq` / `<leader>dr` / `<leader>du` | debug: terminate / REPL / toggle UI |
-| `<leader>tt` | easy-dotnet test runner (`:Dotnet` for more) |
+| `<leader>tt` | Neotest: toggle test summary |
+| `<leader>tr` / `<leader>tf` | Neotest: run nearest test / current file |
+| `<leader>td` / `<leader>to` | Neotest: debug nearest test / show output |
 
-In C# buffers easy-dotnet adds: `<leader>tr` run test, `<leader>tf` run file,
-`<leader>td` debug test, `<leader>tp` peek stacktrace, `<leader>te` build errors.
+Run `:EasyDotnet` only when you want easy-dotnet's optional workflow. It
+initializes the plugin without starting its LSP or test discovery; use
+`:Dotnet testrunner` afterwards to open its alternative test runner.
 
 Stock Neovim LSP/diagnostic defaults still apply: `grn`, `grr`, `gri`, `gra`,
 `gO`, `K`, `[d` `]d`, `[q` `]q`. `mini.jump` extends `f`/`F`/`t`/`T` across
@@ -118,8 +122,13 @@ opened (if available).
 | `rg` | grepprg, `:Grep`, pickers |
 | `stylua` | Lua format on save |
 | `lua-language-server` | Lua LSP |
-| .NET SDK + `EasyDotnet` global tool | easy-dotnet (`dotnet tool install -g EasyDotnet`) |
+| .NET SDK | Roslyn and `neotest-vstest` |
+| `roslyn-language-server` | C# LSP (`dotnet tool install --global roslyn-language-server --prerelease`) |
+| `netcoredbg` | Neotest DAP debugging (`yay -S netcoredbg` on Arch/Omarchy) |
+| `EasyDotnet` global tool | Optional easy-dotnet workflow (`dotnet tool install -g EasyDotnet`) |
 
-`roslyn-language-server` and netcoredbg are installed/managed by easy-dotnet.
-Optional: `vscode-langservers-extracted` (npm) for HTML support in Razor files.
+`nvim-lspconfig` supplies the `roslyn_ls` configuration but does not install
+the Roslyn language-server executable. `netcoredbg` must be on `PATH` before
+using `<leader>td`. The standalone `roslyn_ls` setup supports C#; Razor/CSHTML
+support previously supplied by easy-dotnet is intentionally not enabled.
 The unused Node, Perl, Python, and Ruby remote providers are disabled.

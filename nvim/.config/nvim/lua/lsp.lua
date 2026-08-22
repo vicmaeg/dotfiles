@@ -1,2 +1,5 @@
--- C# (Roslyn) is started by easy-dotnet.nvim, see lsp/easy_dotnet.lua for its settings
-vim.lsp.enable({ "lua_ls" })
+vim.pack.add({
+	{ src = "https://github.com/neovim/nvim-lspconfig" },
+}, { confirm = false })
+
+vim.lsp.enable({ "lua_ls", "roslyn_ls" })

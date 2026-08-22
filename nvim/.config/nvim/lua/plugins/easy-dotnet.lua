@@ -3,17 +3,31 @@ vim.pack.add({
 	"https://github.com/nvim-lua/plenary.nvim",
 }, { confirm = false })
 
-require("easy-dotnet").setup({
-	picker = "fzf",
-	test_runner = {
-		mappings = {
-			run_test_from_buffer = { lhs = "<leader>tr", desc = "run test from buffer" },
-			run_all_tests_from_buffer = { lhs = "<leader>tf", desc = "run all tests in file" },
-			debug_test_from_buffer = { lhs = "<leader>td", desc = "debug test from buffer" },
-			peek_stack_trace_from_buffer = { lhs = "<leader>tp", desc = "peek stack trace from buffer" },
-			get_build_errors = { lhs = "<leader>te", desc = "get build errors" },
-		},
-	},
-})
+local initialized = false
 
-vim.keymap.set("n", "<leader>tt", "<cmd>Dotnet testrunner<cr>", { desc = "Dotnet: toggle test runner" })
+vim.api.nvim_create_user_command("EasyDotnet", function()
+	if initialized then
+		vim.notify("easy-dotnet is already initialized; use :Dotnet testrunner", vim.log.levels.INFO)
+		return
+	end
+
+	require("easy-dotnet").setup({
+		picker = "fzf",
+		-- Roslyn, ProjX, project mappings, and debugger setup are owned by the
+		-- dedicated LSP, Neotest, and nvim-dap configurations.
+		lsp = { enabled = false },
+		projx_lsp = { enabled = false },
+		debugger = { auto_register_dap = false },
+		test_runner = {
+			auto_start_testrunner = false,
+			neotest_integration = true,
+		},
+		csproj_mappings = false,
+		fsproj_mappings = false,
+		enable_filetypes = false,
+		auto_bootstrap_namespace = { enabled = false },
+	})
+
+	initialized = true
+	vim.notify("easy-dotnet initialized; use :Dotnet testrunner", vim.log.levels.INFO)
+end, { desc = "Initialize easy-dotnet on demand" })
