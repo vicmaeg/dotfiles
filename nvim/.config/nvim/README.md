@@ -25,10 +25,10 @@ set of focused plugins.
 | `nvim-orgmode/orgmode` | Org files and agenda (`~/org`) |
 | `nvim-treesitter/nvim-treesitter` (`main`) | Highlighting + indent |
 | `neovim/nvim-lspconfig` | Maintained native LSP configurations, including `roslyn_ls` |
-| `nvim-neotest/neotest` + `nsidorenco/neotest-vstest` | .NET test discovery, execution, output, and DAP debugging |
-| `GustavEikaas/easy-dotnet.nvim` | Optional on-demand .NET command and alternative test runner |
+| `vim-test/vim-test` | Runs `dotnet test` in a terminal split (`:TestNearest` / `:TestLast` / `:TestSuite`) |
+| `GustavEikaas/easy-dotnet.nvim` | Optional on-demand .NET commands, test runner UI, and test debugging |
 | `mfussenegger/nvim-dap` | Debug adapter protocol client |
-| `rcarriga/nvim-dap-ui` (+ `nvim-neotest/nvim-nio`) | Debug UI and Neotest async support |
+| `rcarriga/nvim-dap-ui` (+ `nvim-neotest/nvim-nio`) | Debug UI (nvim-nio is a dap-ui dependency) |
 | `nvim-lua/plenary.nvim` | Lua library (easy-dotnet dependency) |
 
 Manage plugins with `:lua vim.pack.update()` (review the update buffer, `:w` to
@@ -83,13 +83,16 @@ short explicit load order.
 | `<F5>` / `<F10>` / `<F11>` / `<F12>` | debug: continue / step over / into / out |
 | `<leader>b` / `<leader>B` | debug: toggle / conditional breakpoint |
 | `<leader>dq` / `<leader>dr` / `<leader>du` | debug: terminate / REPL / toggle UI |
-| `<leader>tt` | Neotest: toggle test summary |
-| `<leader>tr` / `<leader>tf` | Neotest: run nearest test / current file |
-| `<leader>td` / `<leader>to` | Neotest: debug nearest test / show output |
+| `<leader>tr` / `<leader>tl` / `<leader>ts` | vim-test: run nearest / last / suite (`dotnet test` in a terminal split) |
+| `<leader>tt` | easy-dotnet: initialize if needed and toggle the testrunner |
+| `<leader>td` | easy-dotnet: debug test under cursor (C# test buffers, after init) |
 
-Run `:EasyDotnet` only when you want easy-dotnet's optional workflow. It
-initializes the plugin without starting its LSP or test discovery; use
-`:Dotnet testrunner` afterwards to open its alternative test runner.
+Run `:EasyDotnet` (or press `<leader>tt`) only when you want easy-dotnet's
+optional workflow. It initializes the plugin without starting its LSP; test
+discovery starts with the testrunner. Inside the testrunner: `r` run, `d`
+debug, `R` run all, `p` peek stacktrace, `gf` go to source, `]f`/`[f`
+next/prev failing test, `q` close. vim-test's `<leader>td` equivalent does not
+exist: debugging tests always goes through easy-dotnet.
 
 Stock Neovim LSP/diagnostic defaults still apply: `grn`, `grr`, `gri`, `gra`,
 `gO`, `K`, `[d` `]d`, `[q` `]q`. `mini.jump` extends `f`/`F`/`t`/`T` across
@@ -122,9 +125,9 @@ opened (if available).
 | `rg` | grepprg, `:Grep`, pickers |
 | `stylua` | Lua format on save |
 | `lua-language-server` | Lua LSP |
-| .NET SDK | Roslyn and `neotest-vstest` |
+| .NET SDK | Roslyn and `dotnet test` (vim-test, easy-dotnet) |
 | `roslyn-language-server` | C# LSP (`dotnet tool install --global roslyn-language-server --prerelease`) |
-| `netcoredbg` | Neotest DAP debugging (`yay -S netcoredbg` on Arch/Omarchy) |
+| `netcoredbg` | DAP debugging of .NET tests via easy-dotnet (`yay -S netcoredbg` on Arch/Omarchy) |
 | `EasyDotnet` global tool | Optional easy-dotnet workflow (`dotnet tool install -g EasyDotnet`) |
 
 `nvim-lspconfig` supplies the `roslyn_ls` configuration but does not install
