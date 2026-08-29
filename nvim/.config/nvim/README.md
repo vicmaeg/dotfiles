@@ -12,15 +12,15 @@ set of focused plugins.
 - **LSP**: native `vim.lsp` (`lua_ls`, `roslyn_ls`)
 - **Completion**: mini.completion + native cmdline autocompletion
 - **Git**: fugitive (status/blame) + mini.diff (hunk signs) + diffs.nvim
-- **Pickers**: mini.pick (primary) and fzf-lua (`<leader>fz` picker menu)
+- **Pickers**: fzf-lua (including `vim.ui.select`; `<leader>fz` opens its picker menu)
 
 ## Plugins
 
 | Plugin | Role |
 |--------|------|
-| `nvim-mini/mini.nvim` | icons, ai, surround, completion, diff, jump, jump2d, pick, statusline, files |
+| `nvim-mini/mini.nvim` | icons, ai, surround, completion, diff, jump, jump2d, statusline, files |
 | `tpope/vim-fugitive` | Git client (`:Git`, blame, etc.) |
-| `ibhagwan/fzf-lua` | Secondary picker menu (ivy layout) |
+| `ibhagwan/fzf-lua` | Default picker (ivy layout and `vim.ui.select`) |
 | `barrettruth/diffs.nvim` | Diff views (Fugitive integration) |
 | `nvim-orgmode/orgmode` | Org files and agenda (`~/org`) |
 | `nvim-treesitter/nvim-treesitter` (`main`) | Highlighting + indent |
@@ -40,7 +40,6 @@ for reproducible setups.
 
 ```
 init.lua                -- leader, vim.loader, module load order
-ripgreprc               -- include hidden files, exclude .git from rg-backed pickers
 after/lsp/
   roslyn_ls.lua         -- local Roslyn settings layered on nvim-lspconfig
 lua/
@@ -64,10 +63,10 @@ short explicit load order.
 
 | Key | Action |
 |-----|--------|
-| `<leader>ff` / `<leader>fg` / `<leader>fb` | mini.pick: files (including dotfiles) / live ripgrep (including dotfiles) / buffers |
-| `<leader>fh` / `<leader>fr` | mini.pick: help / resume |
+| `<leader>ff` / `<leader>fg` / `<leader>fb` | fzf-lua: files (including dotfiles) / live ripgrep (including dotfiles) / buffers |
+| `<leader>fh` / `<leader>fr` | fzf-lua: help / resume |
 | `<leader>fz` | fzf-lua: choose an internal picker |
-| `<leader>of` | mini.pick: files in `~/org` |
+| `<leader>of` | fzf-lua: files in `~/org` |
 | `<leader>e` / `<leader>E` | mini.files: current path / project root |
 | `<leader>gg` | fugitive `:Git` status |
 | `[h` / `]h` | mini.diff: prev / next hunk |
@@ -108,7 +107,6 @@ Native cmdline autocompletion (Neovim 0.12+):
 - **`:Grep <pattern>`** — live ripgrep results as you type (after 2 chars, including multiword patterns)
 
 Requires `rg` on `PATH` for `:Grep` / `grepprg`.
-The bundled `ripgreprc` makes rg-backed pickers include dotfiles while excluding `.git`.
 
 ## Treesitter parsers
 
