@@ -18,16 +18,56 @@
 [branch]
   autosetuprebase = always
 [alias]
+  # Compact decorated history for every local and remote branch.
   l = log --graph --abbrev-commit --decorate --date=relative --format=format:'%C(bold blue)%h%C(reset) - %C(bold green)(%ar)%C(reset) %C(white)%s%C(reset) %C(dim white)- %an%C(reset)%C(bold yellow)%d%C(reset)' --all
-  d = diff --word-diff
+
+  # Show unstaged changes; use dw when word-level changes are more useful.
+  d = diff
+  dw = diff --word-diff
+
+  # Show changes already added to the index.
+  ds = diff --staged
+
+  # Print a compact working-tree status.
   s = status --short
-  a = add -u
+
+  # Pick one or more changed/untracked files with fzf and add them.
+  a = "!git ls-files --modified --deleted --others --exclude-standard -z | fzf --read0 --print0 --multi --preview 'git ls-files --error-unmatch -- {} >/dev/null 2>&1 && git diff --color=always -- {} || git diff --no-index --color=always /dev/null {}' | xargs -0 -r git add --"
+
+  # Pick a tracked file with unstaged changes, then interactively add its hunks.
+  ap = "!f() { file=$(git diff --name-only --diff-filter=ACDMRTUXB -z | fzf --read0 --preview='git diff --color=always -- {}'); [ -z \"$file\" ] || git add -p -- \"$file\"; }; f"
+
+  # Add modifications and deletions to tracked files, but not untracked files.
+  au = add -u
+
+  # Create a commit.
   c = commit
-  up = !sh -c \"git commit -a -m \\\"Before rebase\\\" && git pull --rebase && git reset HEAD~1\"
+
+  # Pick a commit unique to the current branch and create a fixup! from staged changes.
+  fu = "!f() { base=$(git symbolic-ref --quiet --short refs/remotes/origin/HEAD 2>/dev/null); if [ -z \"$base\" ]; then for candidate in origin/main main origin/master master; do if git rev-parse --verify --quiet \"$candidate^{commit}\" >/dev/null; then base=$candidate; break; fi; done; fi; [ -n \"$base\" ] || { echo 'git fu: could not determine the base branch' >&2; return 2; }; current=$(git branch --show-current); [ -n \"$current\" ] || current=HEAD; base_name=${base#origin/}; [ \"$current\" != \"$base_name\" ] || { echo \"git fu: no feature commits while on $current\"; return 0; }; range=\"$base..HEAD\"; target=$(git rev-list --no-merges -n 1 \"$range\"); [ -n \"$target\" ] || { echo \"git fu: no commits unique to $current\"; return 0; }; staged=$(git diff --cached --name-status); [ -n \"$staged\" ] || { echo 'git fu: no staged changes to fix up' >&2; return 1; }; header=$(printf 'Commits unique to %s (base: %s)\\n\\nStaged files:\\n%s' \"$current\" \"$base\" \"$staged\"); record=$(git log \"$range\" --no-merges --color=always --format='%H%x09%C(auto)%h%d%C(reset) %s %C(dim white)(%cr)%C(reset)' | fzf --ansi --no-sort --delimiter='\\t' --with-nth=2.. --header=\"$header\" --header-first --preview='git show --color=always --stat --patch {1}'); [ -z \"$record\" ] || git commit --fixup=\"$(printf '%s' \"$record\" | cut -f1)\"; }; f"
+
+  # Pull with rebase, temporarily stashing tracked local changes when needed.
+  up = pull --rebase --autostash
+
+  # Start an interactive rebase and automatically arrange fixup!/squash! commits.
   r = rebase -i --autosquash
+
+  # Push the current branch and set its upstream to the same branch on origin.
   pushd = push -u origin HEAD
-  pushf = push -f origin HEAD
-  sf = !sh -c \"git branch | fzf | xargs git switch\"
-  clean-branches = !sh -c 'git branch --merged | grep -Ev \"(^\\*|master|main|dev)\" | xargs git branch -d'
+
+  # Force-push the current branch only if the remote has not changed unexpectedly.
+  pushf = push --force-with-lease origin HEAD
+
+  # Pick a local branch with fzf, preview its recent history, and switch to it.
+  sf = "!f() { branch=$(git for-each-ref --format='%(refname:short)' refs/heads | fzf --preview='git log --color=always --graph --decorate --oneline -30 {}'); [ -z \"$branch\" ] || git switch \"$branch\"; }; f"
+
+  # Pick a commit from history and show the complete change introduced by it.
+  df = "!f() { record=$(git log --color=always --format='%H%x09%C(auto)%h%d%C(reset) %s %C(dim white)(%cr)%C(reset)' | fzf --ansi --no-sort --delimiter='\\t' --with-nth=2.. --preview='git show --color=always --stat --patch {1}'); [ -z \"$record\" ] || git show \"$(printf '%s' \"$record\" | cut -f1)\" \"$@\"; }; f"
+
+  # Find commits that add/remove text, pick one with fzf, and show its change.
+  find = "!f() { [ \"$#\" -gt 0 ] || { echo 'usage: git find <text>' >&2; return 2; }; record=$(git log -S\"$*\" --color=always --format='%H%x09%C(auto)%h%d%C(reset) %s %C(dim white)(%cr)%C(reset)' | fzf --ansi --no-sort --delimiter='\\t' --with-nth=2.. --preview='git show --color=always --stat --patch {1}'); [ -z \"$record\" ] || git show \"$(printf '%s' \"$record\" | cut -f1)\"; }; f"
+
+  # Pick merged local branches and delete them safely; trunk/current stay protected.
+  clean-branches = "!f() { current=$(git branch --show-current); branches=$(git for-each-ref --format='%(refname:short)' --merged=HEAD refs/heads | grep -Ev '^(main|master|dev)$' | grep -Fvx \"$current\" | fzf --multi --preview='git log --color=always --oneline --decorate -20 {}'); [ -z \"$branches\" ] || printf '%s\\n' \"$branches\" | xargs -r git branch -d --; }; f"
 [include]
   path = ~/.gitconfig.local
