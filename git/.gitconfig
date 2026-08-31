@@ -1,6 +1,5 @@
 [user]
-  name = vicmaeg
-  email = vmartos@outlook.com
+  useConfigOnly = true
 [core]
   editor = nvim
   pager = delta
@@ -30,3 +29,5 @@
   pushf = push -f origin HEAD
   sf = !sh -c \"git branch | fzf | xargs git switch\"
   clean-branches = !sh -c 'git branch --merged | grep -Ev \"(^\\*|master|main|dev)\" | xargs git branch -d'
+[include]
+  path = ~/.gitconfig.local
