@@ -25,6 +25,9 @@
   d = diff
   dw = diff --word-diff
 
+  # Pick a file with unstaged changes and show only its diff.
+  dp = "!git diff --name-only --diff-filter=ACDMRTUXB -z | fzf --read0 --print0 --preview='git diff --color=always -- {}' | xargs -0 -r git diff --"
+
   # Show changes already added to the index.
   ds = diff --staged
 
