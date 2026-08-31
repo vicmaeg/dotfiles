@@ -1,4 +1,5 @@
 -- Load plugin modules in a predictable order.
+require("plugins.colorscheme")
 require("plugins.mini")
 require("plugins.fzf-lua")
 require("plugins.diffs")

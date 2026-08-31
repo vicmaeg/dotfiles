@@ -7,7 +7,7 @@ set of focused plugins.
 ## Overview
 
 - **Leader**: `<Space>`
-- **Colorscheme**: `retrobox`
+- **Colorscheme**: [Solarized Osaka](https://github.com/craftzdog/solarized-osaka.nvim)
 - **Plugins**: `vim.pack` + lockfile (`nvim-pack-lock.json`)
 - **LSP**: native `vim.lsp` (`lua_ls`, `roslyn_ls`)
 - **Completion**: mini.completion + native cmdline autocompletion
@@ -18,6 +18,7 @@ set of focused plugins.
 
 | Plugin | Role |
 |--------|------|
+| `craftzdog/solarized-osaka.nvim` | Colorscheme and terminal palette |
 | `nvim-mini/mini.nvim` | icons, ai, surround, completion, diff, jump, jump2d, statusline, files |
 | `tpope/vim-fugitive` | Git client (`:Git`, blame, etc.) |
 | `ibhagwan/fzf-lua` | Default picker (ivy layout and `vim.ui.select`) |
@@ -43,15 +44,14 @@ init.lua                -- leader, vim.loader, module load order
 after/lsp/
   roslyn_ls.lua         -- local Roslyn settings layered on nvim-lspconfig
 lua/
-  options.lua           -- defaults, wildmode/pum, rg grepprg
+  options.lua           -- defaults, true color, wildmode/pum, rg grepprg
   keymaps.lua           -- general keymaps
   autocmds.lua          -- yank highlight, restore cursor
   cmdline.lua           -- cmdline autocompletion, fuzzy :find, live :Grep
   diagnostics.lua       -- diagnostic UI
-  colors.lua            -- retrobox
   pack.lua              -- vim.pack hooks (TSUpdate on treesitter install/update)
   plugins/init.lua      -- ordered plugin loader
-  plugins/*.lua         -- one vim.pack.add + setup per plugin
+  plugins/*.lua         -- one vim.pack.add + setup per plugin (including the colorscheme)
   formatting.lua        -- diff-based stylua formatting, else one selected LSP formatter
   lsp.lua               -- vim.lsp.enable
 ```
