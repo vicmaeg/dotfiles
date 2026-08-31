@@ -9,7 +9,7 @@
 === DONE ===
 
 * Configure archlinux wsl the same way as I would do in my work laptop
-	* create a bash script that will setup all the necessary work (and personal) dependencies using pacman: git, nvim, lazygit, lazydocker, docker cli, podman or rancher, wget, zoxide, nushell
+	* create a bash script that will setup all the necessary work (and personal) dependencies using pacman: git, nvim, lazygit, lazydocker, docker cli, podman or rancher, wget, zoxide
 * understand my neovim configuration based on MiniMax and make it my own, removing plugins and/or adding new plugins
 	* Currently it logs error when opening some .lua files of my configuration. Fix it.
 	* I like to continue using Mini as much as possible, but I need to understand all the plugins. Fzf-lua for picker is what it is better for me.
