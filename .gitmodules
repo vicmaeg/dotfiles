@@ -1,3 +1,0 @@
-[submodule "bin/.local/tmux-sessionizer"]
-	path = bin/.local/tmux-sessionizer
-	url = https://github.com/vicmaeg/tmux-sessionizer.git

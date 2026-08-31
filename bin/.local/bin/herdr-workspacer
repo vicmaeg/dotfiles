@@ -1,8 +1,8 @@
 #!/usr/bin/env bash
 # herdr-workspacer: jump to a herdr workspace via fzf. Existing workspaces are
 # listed first as "[workspace] <label>", followed by zoxide entries. Zoxide
-# directories are matched by label (= directory basename), like tmux-sessionizer
-# matches session names: same-basename directories share one workspace.
+# Directories are matched by label (= directory basename), so same-basename
+# directories share one workspace.
 set -euo pipefail
 
 for cmd in herdr zoxide fzf jq; do

@@ -14,5 +14,4 @@
 	* Currently it logs error when opening some .lua files of my configuration. Fix it.
 	* I like to continue using Mini as much as possible, but I need to understand all the plugins. Fzf-lua for picker is what it is better for me.
 	* I would like to invest time on setting up some lua code to start workspaces/projects in new vim tabs.
-    * NOT NECESSARY WHEN USING TMUX with sesh
-		* Consider neovide if I really like this workflow
+	* Consider neovide if I really like this workflow

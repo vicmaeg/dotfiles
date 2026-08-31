@@ -6,7 +6,6 @@ source ~/.local/share/omarchy/default/bash/rc
 export DOTNET_ROOT="$HOME/.dotnet"
 PATH="$HOME/.dotnet:$PATH"
 PATH="$PATH:$HOME/.dotnet/tools"
-PATH="$PATH:$HOME/.local/tmux-sessionizer"
 PATH="$PATH:$HOME/.opencode/bin"
 PATH="$PATH:$HOME/.local/bin"
 
@@ -16,5 +15,4 @@ if [ -z "$SSH_AUTH_SOCK" ] ; then
 fi
 
 alias lg=lazygit
-alias t=tmux-sessionizer
 alias hw=herdr-workspacer
