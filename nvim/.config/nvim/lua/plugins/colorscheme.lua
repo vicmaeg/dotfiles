@@ -1,8 +1,6 @@
-vim.pack.add({ "https://github.com/craftzdog/solarized-osaka.nvim" }, { confirm = false })
+vim.pack.add({
+	"https://github.com/rebelot/kanagawa.nvim",
+}, { confirm = false })
 
-require("solarized-osaka").setup({
-	transparent = false,
-	terminal_colors = true,
-})
-
-vim.cmd.colorscheme("solarized-osaka")
+require("kanagawa").setup({})
+vim.cmd.colorscheme("kanagawa-wave")

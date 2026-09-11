@@ -7,7 +7,7 @@ set of focused plugins.
 ## Overview
 
 - **Leader**: `<Space>`
-- **Colorscheme**: [Solarized Osaka](https://github.com/craftzdog/solarized-osaka.nvim)
+- **Colorscheme**: [Kanagawa](https://github.com/rebelot/kanagawa.nvim) (`kanagawa-wave`)
 - **Plugins**: `vim.pack` + lockfile (`nvim-pack-lock.json`)
 - **LSP**: native `vim.lsp` (`lua_ls`, `roslyn_ls`)
 - **Completion**: mini.completion + native cmdline autocompletion
@@ -18,7 +18,7 @@ set of focused plugins.
 
 | Plugin | Role |
 |--------|------|
-| `craftzdog/solarized-osaka.nvim` | Colorscheme and terminal palette |
+| `rebelot/kanagawa.nvim` | Kanagawa Wave colorscheme |
 | `nvim-mini/mini.nvim` | icons, ai, surround, completion, diff, jump, jump2d, statusline, files |
 | `tpope/vim-fugitive` | Git client (`:Git`, blame, etc.) |
 | `ibhagwan/fzf-lua` | Default picker (ivy layout and `vim.ui.select`) |
