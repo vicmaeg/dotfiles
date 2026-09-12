@@ -130,7 +130,11 @@ The DWIM behaviour of this command is as follows:
 (use-package kanagawa-themes
   :ensure t)
 
-(load-theme 'modus-vivendi :no-confirm-loading)
+(add-to-list 'load-path (locate-user-emacs-file "lisp"))
+
+(require 'my-omarchy-theme)
+(unless (my/omarchy-theme-sync-enable)
+  (load-theme 'modus-vivendi :no-confirm-loading))
 
 (use-package fontaine
   :ensure t
@@ -726,7 +730,6 @@ The DWIM behaviour of this command is as follows:
   (add-hook 'lsp-completion-mode-hook #'my/lsp-mode-setup-completion)
   (lsp-enable-which-key-integration))
 
-(add-to-list 'load-path (locate-user-emacs-file "lisp"))
 (require 'lsp-csharp)
 (require 'lsp-c)
 (require 'my-perspectives)
