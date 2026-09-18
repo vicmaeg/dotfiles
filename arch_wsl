@@ -3,7 +3,7 @@
 set -euo pipefail
 
 if [[ -z "${STOW_FOLDERS:-}" ]]; then
-    STOW_FOLDERS="bash,bin,git,nvim,herdr"
+    STOW_FOLDERS="bash,bin,git,nvim,nb,herdr"
 fi
 
 if [[ -z "${DOTFILES:-}" ]]; then

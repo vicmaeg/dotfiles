@@ -1,0 +1,503 @@
+#!/usr/bin/env bash
+# nb-fzf: shared fzf and fzf-lua interface for nb notebooks.
+set -euo pipefail
+
+readonly program=${0##*/}
+readonly config_file=${NB_FZF_CONFIG:-"$HOME/.config/nb-fzf/config"}
+
+if [[ -r $config_file ]]; then
+    # shellcheck source=/dev/null
+    source "$config_file"
+fi
+
+if ! declare -p NB_FZF_NOTEBOOKS &>/dev/null; then
+    NB_FZF_NOTEBOOKS=(personal work daily)
+fi
+if ! declare -p NB_FZF_PRIMARY_NOTEBOOKS &>/dev/null; then
+    NB_FZF_PRIMARY_NOTEBOOKS=(personal work)
+fi
+NB_FZF_DAILY_NOTEBOOK=${NB_FZF_DAILY_NOTEBOOK:-daily}
+NB_FZF_TEMPLATE_DIR=${NB_FZF_TEMPLATE_DIR:-"$HOME/.config/nb/templates"}
+
+die() {
+    printf '%s: %s\n' "$program" "$*" >&2
+    exit 1
+}
+
+require() {
+    command -v "$1" &>/dev/null || die "$1 is required"
+}
+
+nb_run() {
+    command nb "$@" --no-color
+}
+
+contains() {
+    local needle=$1 item
+    shift
+    for item in "$@"; do
+        [[ $item == "$needle" ]] && return 0
+    done
+    return 1
+}
+
+notebook_path() {
+    nb_run notebooks show "$1" --path 2>/dev/null
+}
+
+notebook_exists() {
+    [[ -n $(notebook_path "$1" || :) ]]
+}
+
+configured_notebooks() {
+    local name
+    for name in "${NB_FZF_NOTEBOOKS[@]}"; do
+        notebook_exists "$name" && printf '%s\n' "$name"
+    done
+}
+
+scope_notebooks() {
+    local scope=${1:-all}
+    if [[ $scope == all ]]; then
+        configured_notebooks
+        return
+    fi
+    contains "$scope" "${NB_FZF_NOTEBOOKS[@]}" || die "unknown configured notebook: $scope"
+    notebook_exists "$scope" || die "notebook is not installed on this machine: $scope"
+    printf '%s\n' "$scope"
+}
+
+relative_path() {
+    local root=$1 path=$2
+    printf '%s' "${path#"$root"/}"
+}
+
+note_title() {
+    awk '
+        NR == 1 && $0 == "---" { frontmatter = 1; next }
+        frontmatter && /^title:[[:space:]]*/ {
+            sub(/^title:[[:space:]]*/, "")
+            gsub(/^['\''"]|['\''"]$/, "")
+            print
+            exit
+        }
+        frontmatter && $0 == "---" { frontmatter = 0; next }
+        !frontmatter && /^#[[:space:]]+/ {
+            sub(/^#[[:space:]]+/, "")
+            print
+            exit
+        }
+    ' "$1"
+}
+
+note_tags() {
+    LC_ALL=C grep -Eho '#[A-Za-z0-9_/-]+' "$1" 2>/dev/null \
+        | LC_ALL=C sort -u \
+        | paste -sd ' ' - || :
+}
+
+sanitize_field() {
+    tr '\t\r\n' '   ' <<<"$1" | sed -E 's/[[:space:]]+$//'
+}
+
+selector_for_path() {
+    local notebook=$1 root=$2 path=$3
+    printf '%s:%s' "$notebook" "$(relative_path "$root" "$path")"
+}
+
+emit_record() {
+    local notebook=$1 root=$2 path=$3 line=${4:-1} match=${5:-}
+    local title tags selector
+    title=$(note_title "$path")
+    [[ -n $title ]] || title=${path##*/}
+    tags=$(note_tags "$path")
+    selector=$(selector_for_path "$notebook" "$root" "$path")
+    printf '%s\t%s\t%s\t%s\t%s\t%s\n' \
+        "$path" "$line" "$selector" \
+        "$(sanitize_field "$title")" \
+        "$(sanitize_field "$tags")" \
+        "$(sanitize_field "$match")"
+}
+
+emit_notes() {
+    local scope=${1:-all} notebook root path
+    while IFS= read -r notebook; do
+        root=$(notebook_path "$notebook")
+        while IFS= read -r -d '' path; do
+            emit_record "$notebook" "$root" "$path"
+        done < <(find "$root" -type f -name '*.md' -not -path '*/.git/*' -print0 | sort -z)
+    done < <(scope_notebooks "$scope")
+}
+
+matching_paths() {
+    local mode=$1 scope=$2
+    shift 2
+    local notebook path
+    while IFS= read -r notebook; do
+        case $mode in
+            search)
+                nb_run search "$notebook:" --path "$@" 2>/dev/null || :
+                ;;
+            tags)
+                local args=() tag
+                for tag in "$@"; do
+                    tag=${tag#\#}
+                    args+=(--tag "$tag")
+                done
+                nb_run search "$notebook:" --path "${args[@]}" 2>/dev/null || :
+                ;;
+        esac
+    done < <(scope_notebooks "$scope") | awk 'NF && !seen[$0]++'
+}
+
+notebook_for_path() {
+    local path=$1 notebook root
+    for notebook in "${NB_FZF_NOTEBOOKS[@]}"; do
+        notebook_exists "$notebook" || continue
+        root=$(notebook_path "$notebook")
+        if [[ $path == "$root"/* ]]; then
+            printf '%s\t%s\n' "$notebook" "$root"
+            return 0
+        fi
+    done
+    return 1
+}
+
+emit_search() {
+    local scope=$1 query=$2 path notebook root line text location
+    while IFS= read -r path; do
+        [[ -f $path ]] || continue
+        location=$(notebook_for_path "$path") || continue
+        IFS=$'\t' read -r notebook root <<<"$location"
+        while IFS=: read -r line text; do
+            [[ $line =~ ^[0-9]+$ ]] || continue
+            emit_record "$notebook" "$root" "$path" "$line" "$text"
+        done < <(rg --line-number --no-heading --color never --ignore-case -- "$query" "$path" 2>/dev/null || :)
+    done < <(matching_paths search "$scope" "$query")
+}
+
+emit_tagged() {
+    local scope=$1 path notebook root location
+    shift
+    while IFS= read -r path; do
+        [[ -f $path ]] || continue
+        location=$(notebook_for_path "$path") || continue
+        IFS=$'\t' read -r notebook root <<<"$location"
+        emit_record "$notebook" "$root" "$path"
+    done < <(matching_paths tags "$scope" "$@")
+}
+
+emit_next() {
+    local scope=$1 path notebook root line text location
+    while IFS= read -r path; do
+        [[ -f $path ]] || continue
+        location=$(notebook_for_path "$path") || continue
+        IFS=$'\t' read -r notebook root <<<"$location"
+        while IFS=: read -r line text; do
+            [[ $line =~ ^[0-9]+$ ]] || continue
+            emit_record "$notebook" "$root" "$path" "$line" "$text"
+        done < <(rg --line-number --no-heading --color never --pcre2 \
+            '(?<![A-Za-z0-9_/-])#next(?![A-Za-z0-9_/-])' "$path" 2>/dev/null || :)
+    done < <(matching_paths tags "$scope" next)
+}
+
+emit_tags() {
+    local scope=$1 notebook root
+    while IFS= read -r notebook; do
+        root=$(notebook_path "$notebook")
+        rg --only-matching --no-filename --color never '#[A-Za-z0-9_/-]+' "$root" \
+            --glob '*.md' --glob '!**/.git/**' 2>/dev/null || :
+    done < <(scope_notebooks "$scope") | LC_ALL=C sort -u
+}
+
+preview_note() {
+    local path=${1:?} line=${2:-1}
+    [[ -f $path ]] || die "note not found: $path"
+    [[ $line =~ ^[0-9]+$ ]] || line=1
+    if command -v bat &>/dev/null; then
+        bat --color=always --style=numbers --highlight-line "$line" -- "$path"
+    else
+        nl -ba -- "$path" | sed -n "$((line > 8 ? line - 8 : 1)),$((line + 20))p"
+    fi
+}
+
+fzf_record() {
+    local prompt=$1 query=${2:-}
+    fzf --delimiter=$'\t' --with-nth=3,4,5,6 \
+        --prompt="$prompt> " --query="$query" \
+        --preview="$program __preview {1} {2}" \
+        --preview-window='right,60%,wrap' || :
+}
+
+open_record() {
+    local record=$1 path line selector title tags match
+    [[ -n $record ]] || return 0
+    IFS=$'\t' read -r path line selector title tags match <<<"$record"
+    [[ $line =~ ^[0-9]+$ ]] || line=1
+    nb_run edit "$selector" --editor "nvim +$line"
+}
+
+parse_scope() {
+    local -n output_scope=$1 output_args=$2
+    shift 2
+    output_scope=all
+    output_args=()
+    while (($#)); do
+        case $1 in
+            --notebook)
+                [[ $# -ge 2 ]] || die "--notebook requires a name"
+                output_scope=$2
+                shift 2
+                ;;
+            --notebook=*)
+                output_scope=${1#*=}
+                shift
+                ;;
+            *)
+                output_args+=("$1")
+                shift
+                ;;
+        esac
+    done
+}
+
+ensure_folder() {
+    local notebook=$1 folder=$2 root
+    root=$(notebook_path "$notebook")
+    [[ -d $root/$folder ]] || nb_run folders add "$notebook:" "$folder" >/dev/null
+}
+
+init_layout() {
+    local primary=${1:-}
+    contains "$primary" "${NB_FZF_PRIMARY_NOTEBOOKS[@]}" \
+        || die "usage: $program init <${NB_FZF_PRIMARY_NOTEBOOKS[*]}>"
+
+    # Trigger nb's initial home setup if this is a fresh installation.
+    nb_run notebooks --names >/dev/null || :
+    if ! notebook_exists "$primary"; then
+        if notebook_exists home; then
+            die "home exists; rename it first with: nb notebooks rename home $primary"
+        fi
+        nb_run notebooks add "$primary" >/dev/null
+    fi
+    notebook_exists "$NB_FZF_DAILY_NOTEBOOK" \
+        || nb_run notebooks add "$NB_FZF_DAILY_NOTEBOOK" >/dev/null
+    ensure_folder "$primary" projects
+    ensure_folder "$primary" areas
+    printf 'Initialized %s and %s.\n' "$primary" "$NB_FZF_DAILY_NOTEBOOK"
+}
+
+normalize_tags() {
+    local raw=$1 tag output=()
+    raw=${raw// /,}
+    IFS=',' read -ra input_tags <<<"$raw"
+    for tag in "${input_tags[@]}"; do
+        tag=${tag#\#}
+        [[ -n $tag ]] && output+=("$tag")
+    done
+    local IFS=,
+    printf '%s' "${output[*]}"
+}
+
+create_note() {
+    local type=${1:-}
+    shift || :
+    contains "$type" general project area || die "usage: $program new <general|project|area>"
+
+    local title= category= extra_tags= print_path=0
+    while (($#)); do
+        case $1 in
+            --title) title=${2:-}; shift 2 ;;
+            --category) category=${2:-}; shift 2 ;;
+            --tags) extra_tags=${2:-}; shift 2 ;;
+            --print-path) print_path=1; shift ;;
+            *) die "unknown new option: $1" ;;
+        esac
+    done
+
+    local current
+    current=$(nb_run notebooks current)
+    contains "$current" "${NB_FZF_PRIMARY_NOTEBOOKS[@]}" \
+        || die "current notebook '$current' is not primary; run: nb use personal  (or: nb use work)"
+
+    if [[ -z $title && -t 0 ]]; then
+        read -r -p 'Title: ' title
+    fi
+    [[ -n $title ]] || die "title is required"
+
+    local folder= template=$NB_FZF_TEMPLATE_DIR/general.md required_tag=
+    case $type in
+        project)
+            folder=projects
+            template=$NB_FZF_TEMPLATE_DIR/project.md
+            [[ -n $category ]] || read -r -p 'Project tag suffix: ' category
+            [[ $category =~ ^[A-Za-z0-9_/-]+$ ]] || die "invalid project tag suffix"
+            required_tag="projects/${category#projects/}"
+            ;;
+        area)
+            folder=areas
+            template=$NB_FZF_TEMPLATE_DIR/area.md
+            [[ -n $category ]] || read -r -p 'Area tag suffix: ' category
+            [[ $category =~ ^[A-Za-z0-9_/-]+$ ]] || die "invalid area tag suffix"
+            required_tag="areas/${category#areas/}"
+            ;;
+    esac
+    if [[ -z $extra_tags && -t 0 ]]; then
+        read -r -p 'Extra tags (comma-separated, optional): ' extra_tags
+    fi
+    extra_tags=$(normalize_tags "$extra_tags")
+    local tags=$required_tag
+    [[ -z $tags || -z $extra_tags ]] || tags+=,
+    tags+=$extra_tags
+
+    [[ -r $template ]] || die "template not found: $template"
+    ensure_folder "$current" projects
+    ensure_folder "$current" areas
+
+    local timestamp target filename selector path
+    timestamp=$(date +%Y%m%d%H%M%S)
+    target=${folder:+$folder/}$timestamp.md
+    filename=$(nb_run notebooks show "$current" --filename "$target")
+    if [[ -n $folder ]]; then
+        target=${filename#"$folder/"}
+        selector="$current:$folder/"
+    else
+        target=$filename
+        selector="$current:"
+    fi
+
+    local add_args=(add "$selector" --filename "$target" --title "$title" --template "$template")
+    [[ -n $tags ]] && add_args+=(--tags "$tags")
+    NB_EDITOR=: nb_run "${add_args[@]}" >/dev/null
+    path=$(nb_run show "$current:${folder:+$folder/}$target" --path)
+
+    if ((print_path)); then
+        printf '%s\n' "$path"
+    else
+        nb_run edit "$current:${folder:+$folder/}$target"
+    fi
+}
+
+daily_note() {
+    local requested_date= print_path=0
+    while (($#)); do
+        case $1 in
+            --print-path) print_path=1; shift ;;
+            *)
+                [[ -z $requested_date ]] || die "usage: $program daily [YYYY-MM-DD]"
+                requested_date=$1
+                shift
+                ;;
+        esac
+    done
+    local note_date=${requested_date:-$(date +%F)}
+    [[ $(date -d "$note_date" +%F 2>/dev/null || :) == "$note_date" ]] \
+        || die "invalid date: $note_date"
+    notebook_exists "$NB_FZF_DAILY_NOTEBOOK" \
+        || die "daily notebook is missing; run: $program init personal  (or: $program init work)"
+
+    local selector="$NB_FZF_DAILY_NOTEBOOK:$note_date.md" path
+    path=$(nb_run show "$selector" --path 2>/dev/null || :)
+    if [[ -z $path ]]; then
+        [[ -r $NB_FZF_TEMPLATE_DIR/daily.md ]] || die "daily template not found"
+        NB_EDITOR=: nb_run add "$NB_FZF_DAILY_NOTEBOOK:" \
+            --filename "$note_date.md" --title "$note_date" --tags daily \
+            --template "$NB_FZF_TEMPLATE_DIR/daily.md" >/dev/null
+        path=$(nb_run show "$selector" --path)
+    fi
+    if ((print_path)); then
+        printf '%s\n' "$path"
+    else
+        nb_run edit "$selector"
+    fi
+}
+
+usage() {
+    cat <<EOF
+Usage:
+  $program init <personal|work>
+  $program find [query] [--notebook NAME|all]
+  $program search [query ...] [--notebook NAME|all]
+  $program tags [tag ...] [--notebook NAME|all]
+  $program next [--notebook NAME|all]
+  $program new <general|project|area>
+  $program daily [YYYY-MM-DD]
+EOF
+}
+
+require nb
+command_name=${1:-help}
+shift || :
+
+case $command_name in
+    init)
+        init_layout "${1:-}"
+        ;;
+    find)
+        require fzf
+        parse_scope scope args "$@"
+        query=${args[*]:-}
+        selected=$(emit_notes "$scope" | fzf_record notes "$query")
+        open_record "$selected"
+        ;;
+    search)
+        require fzf
+        require rg
+        parse_scope scope args "$@"
+        query=${args[*]:-}
+        if [[ -z $query ]]; then
+            read -r -p 'Search notes: ' query
+        fi
+        [[ -n $query ]] || exit 0
+        selected=$(emit_search "$scope" "$query" | fzf_record search)
+        open_record "$selected"
+        ;;
+    tags)
+        require fzf
+        require rg
+        parse_scope scope args "$@"
+        if ((${#args[@]} == 0)); then
+            mapfile -t args < <(emit_tags "$scope" | fzf --multi --prompt='tags> ' || :)
+        fi
+        ((${#args[@]})) || exit 0
+        selected=$(emit_tagged "$scope" "${args[@]}" | fzf_record tags)
+        open_record "$selected"
+        ;;
+    next)
+        require fzf
+        require rg
+        parse_scope scope args "$@"
+        ((${#args[@]} == 0)) || die "next accepts only --notebook"
+        selected=$(emit_next "$scope" | fzf_record next)
+        open_record "$selected"
+        ;;
+    new)
+        create_note "$@"
+        ;;
+    daily)
+        daily_note "$@"
+        ;;
+    __emit)
+        require rg
+        mode=${1:-}
+        shift || :
+        case $mode in
+            notes) emit_notes "${1:-all}" ;;
+            search) emit_search "${1:-all}" "${2:-}" ;;
+            tagged) scope=${1:-all}; shift || :; emit_tagged "$scope" "$@" ;;
+            next) emit_next "${1:-all}" ;;
+            tags) emit_tags "${1:-all}" ;;
+            *) die "unknown emit mode: $mode" ;;
+        esac
+        ;;
+    __preview)
+        preview_note "$@"
+        ;;
+    help|-h|--help)
+        usage
+        ;;
+    *)
+        usage >&2
+        exit 1
+        ;;
+esac
