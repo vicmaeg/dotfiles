@@ -1,0 +1,6 @@
+# Sourced by nb-fzf. Notebook names can be changed here without editing the
+# executable or the Neovim integration.
+NB_FZF_NOTEBOOKS=(personal work daily)
+NB_FZF_PRIMARY_NOTEBOOKS=(personal work)
+NB_FZF_DAILY_NOTEBOOK=daily
+NB_FZF_TEMPLATE_DIR="$HOME/.config/nb/templates"

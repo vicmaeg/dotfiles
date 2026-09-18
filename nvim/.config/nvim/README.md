@@ -9,7 +9,7 @@ set of focused plugins.
 - **Leader**: `<Space>`
 - **Colorscheme**: [Kanagawa](https://github.com/rebelot/kanagawa.nvim) (`kanagawa-wave`)
 - **Plugins**: `vim.pack` + lockfile (`nvim-pack-lock.json`)
-- **LSP**: native `vim.lsp` (`lua_ls`, `roslyn_ls`) + `zk lsp` for the notebook
+- **LSP**: native `vim.lsp` (`lua_ls`, `roslyn_ls`)
 - **Completion**: mini.completion + native cmdline autocompletion
 - **Git**: fugitive (status/blame) + mini.diff (hunk signs) + diffs.nvim
 - **Pickers**: fzf-lua (including `vim.ui.select`; `<leader>fz` opens its picker menu)
@@ -23,8 +23,6 @@ set of focused plugins.
 | `tpope/vim-fugitive` | Git client (`:Git`, blame, etc.) |
 | `ibhagwan/fzf-lua` | Default picker (ivy layout and `vim.ui.select`) |
 | `barrettruth/diffs.nvim` | Diff views (Fugitive integration) |
-| `zk-org/zk-nvim` | Markdown notes, links, search, tags, and `zk lsp` integration (`~/org`) |
-| `zenarvus/md-agenda.nvim` | Markdown task agenda and dashboard |
 | `nvim-treesitter/nvim-treesitter` (`main`) | Highlighting + indent |
 | `neovim/nvim-lspconfig` | Maintained native LSP configurations, including `roslyn_ls` |
 | `vim-test/vim-test` | Runs `dotnet test` in a terminal split (`:TestNearest` / `:TestLast` / `:TestSuite`) |
@@ -52,7 +50,7 @@ lua/
   diagnostics.lua       -- diagnostic UI
   pack.lua              -- vim.pack hooks (TSUpdate on treesitter install/update)
   plugins/init.lua      -- ordered plugin loader
-  plugins/*.lua         -- one vim.pack.add + setup per plugin (including zk and md-agenda)
+  plugins/*.lua         -- plugin setup and focused integrations, including nb
   formatting.lua        -- diff-based stylua formatting, else one selected LSP formatter
   lsp.lua               -- vim.lsp.enable
 ```
@@ -67,16 +65,11 @@ short explicit load order.
 | `<leader>ff` / `<leader>fg` / `<leader>fb` | fzf-lua: files (including dotfiles) / live ripgrep (including dotfiles) / buffers |
 | `<leader>fh` / `<leader>fr` | fzf-lua: help / resume |
 | `<leader>fz` | fzf-lua: choose an internal picker |
-| `<leader>nn` / `<leader>np` / `<leader>na` | zk: create a general / project / area note |
-| `<leader>nd` | zk: create or open today's daily note |
-| `<leader>nf` / `<leader>ns` / `<leader>nt` | zk: find notes / search contents / browse tags |
-| `<leader>ni` | zk: insert a link (or link the visual selection) |
-| `<leader>nb` / `<leader>nl` | zk: backlinks / outgoing links for the current note |
-| `<leader>at` | md-agenda: open the global `tasks.md` |
-| `<leader>aa` / `<leader>ad` | md-agenda: timeline / dashboard |
-| `<leader>ac` / `<leader>ax` | md-agenda: complete / cancel the task under the cursor |
-| `<leader>as` / `<leader>aD` | md-agenda: schedule task / set deadline |
-| `<leader>ap` | md-agenda: update task progress |
+| `<leader>nn` / `<leader>np` / `<leader>na` | nb: create a general / project / area note in the current primary notebook |
+| `<leader>nd` | nb: create or open today's note in `daily` |
+| `<leader>nf` / `<leader>ns` / `<leader>nt` | nb-fzf: find notes / search contents / filter by tags |
+| `<leader>nx` | nb-fzf: find exact `#next` lines and jump to the selected match |
+| `<leader>ni` | nb-fzf: pick a note and insert an nb wiki link |
 | `<leader>e` / `<leader>E` | mini.files: current path / project root |
 | `<leader>gg` | fugitive `:Git` status |
 | `[h` / `]h` | mini.diff: prev / next hunk |
@@ -110,25 +103,17 @@ and signature help.
 
 ## Notes and tasks
 
-`~/org` is a zk notebook. General notes live in its root, with project, area,
-and daily notes in `projects/`, `areas/`, and `daily/`. Root, project, and area
-notes use timestamp-and-slug filenames; daily notes use `YYYY-MM-DD.md`.
-Templates and indexing settings live in `~/org/.zk/`.
+Notes are stored in independent nb notebooks. A personal computer normally has
+`personal` and `daily`; a work computer normally has `work` and `daily`.
+General notes live at the primary notebook root, projects and areas use their
+matching subfolders, and daily notes use `YYYY-MM-DD.md`. The same `nb-fzf`
+backend powers terminal fzf and fzf-lua, so selections made in Neovim open in
+the current instance. Creation follows `nb use personal` or `nb use work`;
+combined searches cover whichever configured notebooks exist on the machine.
 
-md-agenda scans `tasks.md`, `projects/`, and `areas/`; daily and ordinary root
-notes are intentionally excluded. Agenda items must be Markdown headings such
-as `### TODO: Task title` or `### DONE: Task title`. Optional dates go directly
-below the heading:
-
-```markdown
-### TODO: Prepare release
-- Scheduled: `2026-09-18 09:00`
-- Deadline: `2026-09-20 17:00`
-```
-
-Use `grd` on a `[[wiki-link]]` to follow it. zk also provides completion,
-hover, backlinks, outgoing links, tags, and dead-link diagnostics while editing
-Markdown inside the notebook.
+Projects require `#projects/<name>`, areas require `#areas/<name>`, and an exact
+`#next` token marks a line for the next-actions picker. There is intentionally
+no agenda or due-date processing.
 
 ## Cmdline
 
@@ -153,7 +138,8 @@ opened (if available).
 | `git` | fugitive, mini.diff, vim.pack |
 | `fzf` | fzf-lua |
 | `rg` | grepprg, `:Grep`, pickers |
-| `zk` | Markdown notebook CLI and language server |
+| `nb` | Markdown notebooks, local Git history, search, tags, and editing |
+| `nb-fzf` | Shared Bash/fzf and fzf-lua note workflow (provided by this repo) |
 | `stylua` | Lua format on save |
 | `lua-language-server` | Lua LSP |
 | .NET SDK | Roslyn and `dotnet test` (vim-test, easy-dotnet) |
@@ -165,4 +151,3 @@ opened (if available).
 the Roslyn language-server executable. `netcoredbg` must be on `PATH` before
 using `<leader>td`. The standalone `roslyn_ls` setup supports C#; Razor/CSHTML
 support previously supplied by easy-dotnet is intentionally not enabled.
-md-agenda also uses `rg` to discover Markdown agenda files. 
