@@ -69,7 +69,8 @@ short explicit load order.
 | `<leader>nd` | nb: create or open today's note in `daily` |
 | `<leader>nf` / `<leader>ns` / `<leader>nt` | nb-fzf: find notes / search contents / filter by tags |
 | `<leader>nx` | nb-fzf: find exact `#next` lines and jump to the selected match |
-| `<leader>ni` | nb-fzf: pick a note and insert an nb wiki link |
+| `<leader>ni` | nb-fzf: pick a note and insert a labeled nb wiki link |
+| `<leader>ng` | nb: open the wiki link under the cursor |
 | `<leader>e` / `<leader>E` | mini.files: current path / project root |
 | `<leader>gg` | fugitive `:Git` status |
 | `[h` / `]h` | mini.diff: prev / next hunk |

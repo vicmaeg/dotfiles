@@ -6,7 +6,8 @@ local function run(args)
 	local result = vim.system(args, { text = true }):wait()
 	if result.code ~= 0 then
 		local message = vim.trim(result.stderr or "")
-		vim.notify(message ~= "" and message or "nb-fzf command failed", vim.log.levels.ERROR)
+		local command = args[1] or "Command"
+		vim.notify(message ~= "" and message or command .. " command failed", vim.log.levels.ERROR)
 		return nil
 	end
 	return vim.trim(result.stdout or "")
@@ -145,12 +146,44 @@ function M.insert_link()
 	picker("notes", {}, {
 		prompt = "link",
 		action = function(entry)
-			local selector = fields(entry)[3]
+			local item = fields(entry)
+			local selector, title = item[3], item[4]
 			if selector and selector ~= "" then
-				vim.api.nvim_put({ "[[" .. selector .. "]]" }, "c", true, true)
+				local label = title and title ~= "" and "|" .. title or ""
+				vim.api.nvim_put({ "[[" .. selector .. label .. "]]" }, "c", true, true)
 			end
 		end,
 	})
+end
+
+local function link_under_cursor()
+	local line = vim.api.nvim_get_current_line()
+	local column = vim.api.nvim_win_get_cursor(0)[2] + 1
+	local offset = 1
+
+	while true do
+		local start_column, end_column, contents = line:find("%[%[([^%]]-)%]%]", offset)
+		if not start_column then
+			return nil
+		end
+		if column >= start_column and column <= end_column then
+			return vim.trim(contents:match("^[^|]+") or "")
+		end
+		offset = end_column + 1
+	end
+end
+
+function M.go_to_link()
+	local selector = link_under_cursor()
+	if not selector or selector == "" then
+		vim.notify("No nb wikilink under cursor", vim.log.levels.INFO)
+		return
+	end
+
+	local path = run({ "nb", "show", selector, "--path", "--no-color" })
+	if path and path ~= "" then
+		vim.cmd.edit(vim.fn.fnameescape(path))
+	end
 end
 
 local map = vim.keymap.set
@@ -164,5 +197,6 @@ map("n", "<leader>nt", M.tags, { desc = "Notes: search tags" })
 map("n", "<leader>no", M.tasks, { desc = "Notes: open tasks" })
 map("n", "<leader>nx", M.next_items, { desc = "Notes: next items" })
 map("n", "<leader>ni", M.insert_link, { desc = "Notes: insert link" })
+map("n", "<leader>ng", M.go_to_link, { desc = "Notes: go to link" })
 
 return M
