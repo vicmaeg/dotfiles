@@ -16,6 +16,9 @@ fi
 if ! declare -p NB_FZF_PRIMARY_NOTEBOOKS &>/dev/null; then
     NB_FZF_PRIMARY_NOTEBOOKS=(personal work)
 fi
+if ! declare -p NB_FZF_TASK_FOLDERS &>/dev/null; then
+    NB_FZF_TASK_FOLDERS=(projects areas)
+fi
 NB_FZF_DAILY_NOTEBOOK=${NB_FZF_DAILY_NOTEBOOK:-daily}
 NB_FZF_TEMPLATE_DIR=${NB_FZF_TEMPLATE_DIR:-"$HOME/.config/nb/templates"}
 
@@ -187,18 +190,92 @@ emit_tagged() {
     done < <(matching_paths tags "$scope" "$@")
 }
 
+task_scopes() {
+    local scope=$1 notebook root folder selector
+    while IFS= read -r notebook; do
+        root=$(notebook_path "$notebook")
+        printf '%s\t%s\t%s:\n' "$notebook" "$root" "$notebook"
+        for folder in "${NB_FZF_TASK_FOLDERS[@]}"; do
+            folder=${folder#/}
+            folder=${folder%/}
+            [[ -n $folder && -d $root/$folder ]] || continue
+            selector="$notebook:$folder/"
+            printf '%s\t%s\t%s\n' "$notebook" "$root" "$selector"
+        done
+    done < <(scope_notebooks "$scope")
+}
+
+task_line_number() {
+    local path=$1 task_number=$2
+    awk -v wanted="$task_number" '
+        /- \[\] / || /- \[ \] / || /- \[x\] / {
+            count++
+            if (count == wanted) {
+                print NR
+                exit
+            }
+        }
+    ' "$path"
+}
+
+todo_line_number() {
+    awk '
+        /^#[[:space:]]+\[\] / || /^#[[:space:]]+\[ \] / {
+            print NR
+            exit
+        }
+    ' "$1"
+}
+
+has_next_tag() {
+    [[ $1 =~ (^|[^A-Za-z0-9_/-])#next($|[^A-Za-z0-9_/-]) ]]
+}
+
+emit_tasks() {
+    local scope=$1 mode=${2:-tasks}
+    local notebook root task_scope raw raw_selector item_selector task_number
+    local path line_number match tags
+    local -A seen=()
+
+    while IFS=$'\t' read -r notebook root task_scope; do
+        while IFS= read -r raw; do
+            raw=${raw//$'\e[?7l'/}
+            raw=${raw//$'\e[?7h'/}
+            [[ $raw =~ ^\[([^]]+)\][[:space:]]+(.+)$ ]] || continue
+            raw_selector=${BASH_REMATCH[1]}
+            match=${BASH_REMATCH[2]}
+            [[ $match == *'[ ]'* ]] || continue
+            [[ -z ${seen[$raw_selector]:-} ]] || continue
+            seen[$raw_selector]=1
+
+            item_selector=$raw_selector
+            task_number=
+            if [[ $raw_selector =~ ^(.+)[[:space:]]+([0-9]+)$ ]]; then
+                item_selector=${BASH_REMATCH[1]}
+                task_number=${BASH_REMATCH[2]}
+            fi
+
+            path=$(nb_run show "$item_selector" --path 2>/dev/null || :)
+            [[ -f $path ]] || continue
+
+            if [[ -n $task_number ]]; then
+                has_next_tag "$match" || [[ $mode != next ]] || continue
+                line_number=$(task_line_number "$path" "$task_number")
+            else
+                if [[ $mode == next ]]; then
+                    tags=$(note_tags "$path")
+                    has_next_tag "$tags" || continue
+                fi
+                line_number=$(todo_line_number "$path")
+            fi
+            [[ $line_number =~ ^[0-9]+$ ]] || line_number=1
+            emit_record "$notebook" "$root" "$path" "$line_number" "$match"
+        done < <(nb_run tasks "$task_scope" open 2>/dev/null || :)
+    done < <(task_scopes "$scope")
+}
+
 emit_next() {
-    local scope=$1 path notebook root line text location
-    while IFS= read -r path; do
-        [[ -f $path ]] || continue
-        location=$(notebook_for_path "$path") || continue
-        IFS=$'\t' read -r notebook root <<<"$location"
-        while IFS=: read -r line text; do
-            [[ $line =~ ^[0-9]+$ ]] || continue
-            emit_record "$notebook" "$root" "$path" "$line" "$text"
-        done < <(rg --line-number --no-heading --color never --pcre2 \
-            '(?<![A-Za-z0-9_/-])#next(?![A-Za-z0-9_/-])' "$path" 2>/dev/null || :)
-    done < <(matching_paths tags "$scope" next)
+    emit_tasks "$1" next
 }
 
 emit_tags() {
@@ -419,6 +496,7 @@ Usage:
   $program find [query] [--notebook NAME|all]
   $program search [query ...] [--notebook NAME|all]
   $program tags [tag ...] [--notebook NAME|all]
+  $program tasks [--notebook NAME|all]
   $program next [--notebook NAME|all]
   $program new <general|project|area>
   $program daily [YYYY-MM-DD]
@@ -465,10 +543,16 @@ case $command_name in
         ;;
     next)
         require fzf
-        require rg
         parse_scope scope args "$@"
         ((${#args[@]} == 0)) || die "next accepts only --notebook"
         selected=$(emit_next "$scope" | fzf_record next)
+        open_record "$selected"
+        ;;
+    tasks)
+        require fzf
+        parse_scope scope args "$@"
+        ((${#args[@]} == 0)) || die "tasks accepts only --notebook"
+        selected=$(emit_tasks "$scope" | fzf_record tasks)
         open_record "$selected"
         ;;
     new)
@@ -478,15 +562,15 @@ case $command_name in
         daily_note "$@"
         ;;
     __emit)
-        require rg
         mode=${1:-}
         shift || :
         case $mode in
             notes) emit_notes "${1:-all}" ;;
-            search) emit_search "${1:-all}" "${2:-}" ;;
-            tagged) scope=${1:-all}; shift || :; emit_tagged "$scope" "$@" ;;
+            search) require rg; emit_search "${1:-all}" "${2:-}" ;;
+            tagged) require rg; scope=${1:-all}; shift || :; emit_tagged "$scope" "$@" ;;
+            tasks) emit_tasks "${1:-all}" ;;
             next) emit_next "${1:-all}" ;;
-            tags) emit_tags "${1:-all}" ;;
+            tags) require rg; emit_tags "${1:-all}" ;;
             *) die "unknown emit mode: $mode" ;;
         esac
         ;;

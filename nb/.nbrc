@@ -3,6 +3,7 @@
 # nb is installed separately; this file only contains portable user settings.
 export NB_DIR="${NB_DIR:-$HOME/.nb}"
 export NB_EDITOR="${NB_EDITOR:-nvim}"
+export NB_BROWSER="${NB_BROWSER:-w3m}"
 export NB_DEFAULT_EXTENSION="${NB_DEFAULT_EXTENSION:-md}"
 export NB_DEFAULT_TEMPLATE="${NB_DEFAULT_TEMPLATE:-$HOME/.config/nb/templates/general.md}"
 
