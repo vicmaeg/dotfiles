@@ -34,7 +34,7 @@ local function picker(mode, args, opts)
 	vim.list_extend(command, args)
 	local output = run(command)
 	if not output or output == "" then
-		vim.notify("No matching nb notes", vim.log.levels.INFO)
+		vim.notify("No matching nb items", vim.log.levels.INFO)
 		return
 	end
 
@@ -101,6 +101,10 @@ function M.next_items()
 	picker("next", {}, { prompt = "next" })
 end
 
+function M.tasks()
+	picker("tasks", {}, { prompt = "tasks" })
+end
+
 function M.new_note(kind)
 	input("Title: ", function(title)
 		if title == "" then
@@ -157,6 +161,7 @@ map("n", "<leader>nd", M.daily, { desc = "Notes: today's daily note" })
 map("n", "<leader>nf", M.find, { desc = "Notes: find" })
 map("n", "<leader>ns", M.search, { desc = "Notes: search contents" })
 map("n", "<leader>nt", M.tags, { desc = "Notes: search tags" })
+map("n", "<leader>no", M.tasks, { desc = "Notes: open tasks" })
 map("n", "<leader>nx", M.next_items, { desc = "Notes: next items" })
 map("n", "<leader>ni", M.insert_link, { desc = "Notes: insert link" })
 

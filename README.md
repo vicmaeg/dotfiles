@@ -23,18 +23,21 @@ Notes use independent nb notebooks and Git histories:
 - General notes live at the primary notebook root, with `projects/` and
   `areas/` subfolders.
 - Project tags use `#projects/<name>` and area tags use `#areas/<name>`.
-- `#next` marks a line that should appear in the next-actions picker.
+- `#next` on an open task marks it for the next-actions picker. A standalone
+  todo can instead carry the document-level `#next` tag.
 
-Notebook roles are configured in `~/.config/nb-fzf/config`. Missing configured
-notebooks are ignored by combined searches, so the same configuration works on
-personal and work computers. Select the primary notebook used for creation with
-`nb use personal` or `nb use work`.
+Notebook roles and task folders are configured in `~/.config/nb-fzf/config`.
+Task pickers query the notebook root plus `NB_FZF_TASK_FOLDERS` (by default,
+`projects` and `areas`). Missing configured notebooks or folders are ignored,
+so the same configuration works on personal and work computers. Select the
+primary notebook used for creation with `nb use personal` or `nb use work`.
 
 ```bash
 nb-fzf find                 # titles, paths, and tags
 nb-fzf search "query"       # full text
 nb-fzf tags                 # multi-tag AND search
-nb-fzf next                 # exact #next lines
+nb-fzf tasks                # all open tasks and todos across folders
+nb-fzf next                 # open tasks tagged #next
 nb-fzf new project          # create in the current primary notebook
 nb-fzf daily                # today's note in daily
 ```
