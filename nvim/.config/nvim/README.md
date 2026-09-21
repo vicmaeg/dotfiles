@@ -7,7 +7,7 @@ set of focused plugins.
 ## Overview
 
 - **Leader**: `<Space>`
-- **Colorscheme**: [Kanagawa](https://github.com/rebelot/kanagawa.nvim) (`kanagawa-wave`)
+- **Colorscheme**: follows the active Omarchy theme; Kanagawa Wave is the fallback
 - **Plugins**: `vim.pack` + lockfile (`nvim-pack-lock.json`)
 - **LSP**: native `vim.lsp` (`lua_ls`, `roslyn_ls`)
 - **Completion**: mini.completion + native cmdline autocompletion
@@ -18,7 +18,8 @@ set of focused plugins.
 
 | Plugin | Role |
 |--------|------|
-| `rebelot/kanagawa.nvim` | Kanagawa Wave colorscheme |
+| Omarchy theme plugins | Stock theme plugins are installed together and kept in the lockfile |
+| `rebelot/kanagawa.nvim` | Kanagawa Wave fallback outside Omarchy or after an error |
 | `nvim-mini/mini.nvim` | icons, ai, surround, completion, diff, jump, jump2d, statusline, files |
 | `tpope/vim-fugitive` | Git client (`:Git`, blame, etc.) |
 | `ibhagwan/fzf-lua` | Default picker (ivy layout and `vim.ui.select`) |
@@ -37,6 +38,13 @@ confirm) and `:lua vim.pack.del({ "name" })`. Offline inspect:
 `:lua vim.pack.update(nil, { offline = true })`. Commit `nvim-pack-lock.json`
 for reproducible setups.
 
+On Omarchy 4, Neovim reads the active theme from
+`~/.local/state/omarchy/current/theme/neovim.lua`. Open instances watch for
+theme changes and apply the theme automatically. All stock Omarchy theme
+plugins are installed during startup, so switching themes only configures and
+applies an existing colorscheme. Catppuccin uses Neovim's built-in
+`catppuccin` colorscheme. Run `:OmarchyThemeReload` to force a refresh.
+
 ## Structure
 
 ```
@@ -44,6 +52,7 @@ init.lua                -- leader, vim.loader, module load order
 after/lsp/
   roslyn_ls.lua         -- local Roslyn settings layered on nvim-lspconfig
 lua/
+  omarchy_theme.lua     -- vim.pack adapter and live Omarchy theme reload
   options.lua           -- defaults, true color, wildmode/pum, rg grepprg
   keymaps.lua           -- general keymaps
   autocmds.lua          -- yank highlight, restore cursor
