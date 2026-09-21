@@ -2,6 +2,7 @@
 require("plugins.colorscheme")
 require("plugins.mini")
 require("plugins.fzf-lua")
+require("plugins.live-preview")
 require("plugins.diffs")
 require("plugins.fugitive")
 require("plugins.nb")

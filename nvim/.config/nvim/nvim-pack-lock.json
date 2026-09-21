@@ -16,6 +16,10 @@
       "rev": "bb85e4bfc8d89b0e62c8fa53ccdd13d12e2f77b3",
       "src": "https://github.com/rebelot/kanagawa.nvim"
     },
+    "live-preview.nvim": {
+      "rev": "a6307fa340ed7c0d96f5c567afc8c991aad94ce0",
+      "src": "https://github.com/brianhuster/live-preview.nvim"
+    },
     "mini.nvim": {
       "rev": "e58ad4b0c9e9376096b9704f98fc00d4c9448870",
       "src": "https://github.com/nvim-mini/mini.nvim"

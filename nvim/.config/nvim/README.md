@@ -22,6 +22,7 @@ set of focused plugins.
 | `nvim-mini/mini.nvim` | icons, ai, surround, completion, diff, jump, jump2d, statusline, files |
 | `tpope/vim-fugitive` | Git client (`:Git`, blame, etc.) |
 | `ibhagwan/fzf-lua` | Default picker (ivy layout and `vim.ui.select`) |
+| `brianhuster/live-preview.nvim` | Live browser preview for Markdown, including Mermaid diagrams and KaTeX math |
 | `barrettruth/diffs.nvim` | Diff views (Fugitive integration) |
 | `nvim-treesitter/nvim-treesitter` (`main`) | Highlighting + indent |
 | `neovim/nvim-lspconfig` | Maintained native LSP configurations, including `roslyn_ls` |
@@ -65,6 +66,8 @@ short explicit load order.
 | `<leader>ff` / `<leader>fg` / `<leader>fb` | fzf-lua: files (including dotfiles) / live ripgrep (including dotfiles) / buffers |
 | `<leader>fh` / `<leader>fr` | fzf-lua: help / resume |
 | `<leader>fz` | fzf-lua: choose an internal picker |
+| `<leader>mp` / `<leader>ms` | Start / stop the live Markdown preview |
+| `<leader>mf` | fzf-lua: choose a file to preview |
 | `<leader>nn` / `<leader>np` / `<leader>na` | nb: create a general / project / area note in the current primary notebook |
 | `<leader>nd` | nb: create or open today's note in `daily` |
 | `<leader>nf` / `<leader>ns` / `<leader>nt` | nb-fzf: find notes / search contents / filter by tags |
@@ -115,6 +118,19 @@ combined searches cover whichever configured notebooks exist on the machine.
 Projects require `#projects/<name>`, areas require `#areas/<name>`, and an exact
 `#next` token marks a line for the next-actions picker. There is intentionally
 no agenda or due-date processing.
+
+## Markdown preview
+
+Open a Markdown file and press `<leader>mp` (`:LivePreview start`) to preview it
+in your default browser. The preview updates as you type and scrolls with the
+editor. Fenced `mermaid` blocks render as diagrams without additional setup.
+Press `<leader>ms` (`:LivePreview close`) to stop the server, or `<leader>mf`
+(`:LivePreview pick`) to choose a file with fzf-lua. HTML, AsciiDoc and SVG are
+also supported.
+
+The server uses `127.0.0.1:5500` by default. If another Neovim instance is already
+previewing on that port, stop its preview first or set a different port with
+`:lua LivePreview.config.port = 5501`. No Node.js or build step is required.
 
 ## Cmdline
 
