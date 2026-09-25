@@ -7,16 +7,25 @@ local colors_file = vim.fs.joinpath(state_root, "theme", "colors.toml")
 
 local setup_modules = {
 	["bjarneo/aether.nvim"] = "aether",
-	["bjarneo/hackerman.nvim"] = "hackerman",
-	["EdenEast/nightfox.nvim"] = "nightfox",
-	["ellisonleao/gruvbox.nvim"] = "gruvbox",
-	["ficcdaf/ashen.nvim"] = "ashen",
 	["folke/tokyonight.nvim"] = "tokyonight",
-	["gthelding/monokai-pro.nvim"] = "monokai-pro",
-	["neanias/everforest-nvim"] = "everforest",
 	["rebelot/kanagawa.nvim"] = "kanagawa",
-	["ribru17/bamboo.nvim"] = "bamboo",
-	["rose-pine/neovim"] = "rose-pine",
+}
+
+-- Replace stock Omarchy plugin schemes with Neovim or mini.nvim schemes.
+local colorscheme_overrides = {
+	ashen = "default",
+	bamboo = "minispring",
+	["catppuccin-latte"] = "catppuccin",
+	["catppuccin-nvim"] = "catppuccin",
+	everforest = "miniwinter",
+	["flexoki-light"] = "retrobox",
+	gruvbox = "retrobox",
+	hackerman = "elflord",
+	lumon = "miniwinter",
+	matteblack = "unokai",
+	nordfox = "miniwinter",
+	["retro-82"] = "minischeme",
+	["rose-pine-dawn"] = "catppuccin",
 }
 
 local fallback = "kanagawa-wave"
@@ -91,15 +100,16 @@ local function parse_theme()
 		local repo = type(entry) == "table" and entry[1] or nil
 		if repo == "LazyVim/LazyVim" then
 			colorscheme = entry.opts and entry.opts.colorscheme
-		elseif repo ~= "catppuccin/nvim" then
+		else
 			table.insert(plugins, entry)
 		end
 	end
 	if type(colorscheme) ~= "string" or colorscheme == "" then
 		return nil, ("%s does not declare a colorscheme"):format(theme_file)
 	end
-	if colorscheme:match("^catppuccin%-") then
-		colorscheme = "catppuccin"
+	local replacement = colorscheme_overrides[colorscheme]
+	if replacement then
+		return { colorscheme = replacement, plugins = {} }
 	end
 	return { colorscheme = colorscheme, plugins = plugins }
 end

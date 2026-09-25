@@ -1,6 +1,6 @@
 -- Load plugin modules in a predictable order.
-require("plugins.colorscheme")
 require("plugins.mini")
+require("plugins.colorscheme")
 require("plugins.fzf-lua")
 require("plugins.live-preview")
 require("plugins.diffs")
