@@ -187,9 +187,15 @@ function M.go_to_link()
 end
 
 local map = vim.keymap.set
-map("n", "<leader>nn", function() M.new_note("general") end, { desc = "Notes: new general note" })
-map("n", "<leader>np", function() M.new_note("project") end, { desc = "Notes: new project" })
-map("n", "<leader>na", function() M.new_note("area") end, { desc = "Notes: new area" })
+map("n", "<leader>nn", function()
+	M.new_note("general")
+end, { desc = "Notes: new general note" })
+map("n", "<leader>np", function()
+	M.new_note("project")
+end, { desc = "Notes: new project" })
+map("n", "<leader>na", function()
+	M.new_note("area")
+end, { desc = "Notes: new area" })
 map("n", "<leader>nd", M.daily, { desc = "Notes: today's daily note" })
 map("n", "<leader>nf", M.find, { desc = "Notes: find" })
 map("n", "<leader>ns", M.search, { desc = "Notes: search contents" })

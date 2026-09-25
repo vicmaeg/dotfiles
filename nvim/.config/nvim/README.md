@@ -55,6 +55,7 @@ lua/
   omarchy_theme.lua     -- vim.pack adapter and live Omarchy theme reload
   options.lua           -- defaults, true color, wildmode/pum, rg grepprg
   keymaps.lua           -- general keymaps
+  herdr_review.lua      -- send line-referenced comments to a Herdr agent
   autocmds.lua          -- yank highlight, restore cursor
   cmdline.lua           -- cmdline autocompletion, fuzzy :find, live :Grep
   diagnostics.lua       -- diagnostic UI
@@ -85,6 +86,7 @@ short explicit load order.
 | `<leader>ng` | nb: open the wiki link under the cursor |
 | `<leader>e` / `<leader>E` | mini.files: current path / project root |
 | `<leader>gg` | fugitive `:Git` status |
+| `<leader>ac` | Insert a file/line review comment into the nearest Herdr agent's input (normal or visual mode) |
 | `[h` / `]h` | mini.diff: prev / next hunk |
 | `[H` / `]H` | mini.diff: first / last hunk |
 | `gh` / `gH` | mini.diff: apply / reset hunk (`gh` also textobject) |
@@ -113,6 +115,15 @@ Stock Neovim LSP/diagnostic defaults still apply: `grn`, `grr`, `gri`, `gra`,
 `gO`, `K`, `[d` `]d`, `[q` `]q`. `mini.jump` extends `f`/`F`/`t`/`T` across
 lines; `mini.ai` adds textobjects; `mini.completion` handles insert completion
 and signature help.
+
+`<leader>ac` requires Neovim to run inside Herdr with the `herdr` CLI available.
+It targets an agent in the same tab first, or another tab in the same workspace;
+when several qualify, choose one from the picker. In Fugitive's `:Git` status,
+place the cursor on a file entry to reference the whole file without line or
+stage details. To comment on specific lines, expand the file's inline diff with
+`=` and place the cursor on a code line (or select code lines). Deleted lines
+are labeled as old-side references. The comment is inserted into the agent's
+input without submitting it; review and submit it manually in the agent UI.
 
 ## Notes and tasks
 
